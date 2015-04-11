@@ -1,0 +1,89 @@
+functor
+import
+   Application
+   Property
+   System
+   OS
+   Gui
+
+   Utils
+   Game
+   Trainer
+   Pokemoz
+   End
+define
+   %% Default values
+   MAP = map
+   WILDPOKEMOZPROBA = 30
+   NBPOKEMOZ = 1
+   DEFAULTSPEED = 5
+   DELAY = 200
+   RUNAWAYPROBA = 50
+
+   %% Posible arguments
+   Args = {Application.getArgs
+           record(
+              map(single char:&m type:atom default:MAP)
+              pokemoz(single char:&p type:int default:NBPOKEMOZ)
+              speed(single char:&s type:int default:DEFAULTSPEED)
+	      wildprobability(single char:&p type:int default:WILDPOKEMOZPROBA)
+              help(single char:&h default:false)
+              )}
+
+   fun {InitPlayers Game Map}
+      Players = {MakeTuple players 1}
+      Players.1 = player(port:{Trainer.trainer 1 Game Pokemon} pos:Pbrave)
+      Players
+   end
+
+   local
+      Game
+   in
+   %% Show help
+      if Args.help then
+	 {Utils.Printf "Usage: "#{Property.get 'application.url'}#" [option]"}
+	 {Utils.Printf "Options:"}
+	 {Utils.Printf "  -m, --map FILE\tFile containing the map (default "#MAP#")"}
+	 {Utils.Printf "  -p, --pokemoz \t Number of pokemon you can have"}
+	 {Utils.Printf "  -s, --speed \t Speed of the trainer [0,10]"}
+	 {Utils.Printf "  -p, --probability \t Probability of wild pokemon in grass"}
+	 {Utils.Printf "  -h, --help \t This help"}
+	 {Utils.Printf "Example :"}
+	 {Application.exit 0}
+      end
+      
+      {Utils.Printf "Map name:\t"#Args.map}
+      {Utils.Printf "#Number of pokemon you can have:\t"#Args.pokemoz}
+      {Utils.Printf "#Speed :\t"#Args.speed}
+      {Utils.Printf "#Probability of wild pokemon:\t"#Args.wildprobability}
+      
+      local Players Map in
+	 Map = {MyPickle.loadPickle {VirtualString.toAtom Args.map}}
+	 {Gui.loadTextures Map}
+	 
+	 Players = {InitPlayers Game Map}
+	 Game = {Game.game Map Players}
+      
+	 {Gui.loadMapWindow Map Players Game}
+	 
+	 {Gui.showWindow}
+	 {Send Game start}
+      end
+      
+      thread
+	 Result
+      in
+	 Result = {End.waitForQuit}
+	 if Result == win then
+	    {Gui.gameFinished "Victory!"}
+	 else
+	    {Gui.gameFinished "Game Over"}
+	 end
+      end
+      
+      {End.waitForGameEnd}
+      {Send Game stop}
+      {End.waitForGameClose}
+      {Gui.closeWindow}
+      {Application.exit 0}
+   end

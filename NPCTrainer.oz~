@@ -1,0 +1,46 @@
+functor
+import
+   OS
+   Utils
+   Param
+export
+   NPCTrainer
+define
+   fun {NPCTrainer Id Game}
+      
+      proc {Move Posistion MoveType}
+         {Send Game move(Id {Utils.calculateNewPos Position MoveType} 1)}
+      end
+      
+      fun {Inbox State Msg}
+         case Msg
+         of play(Position Obj) then
+            if (Obj == 3 orelse Obj == 4) andthen ({OS.rand} mod 5) < 2 then
+               {Send GamePort eat(Id)}
+            else
+               {Move Pos MyUtils.dirs.State}
+            end
+            State
+         [] invalid(Reason Pos) then
+            if Reason == dead then
+               State
+            else
+               Roll = 1+({OS.rand} mod 3)
+               NewState
+            in
+               if Roll >= State then
+                  NewState = Roll + 1
+               else
+                  NewState = Roll
+               end
+               {Move Pos MyUtils.dirs.NewState}
+               NewState
+            end
+         else
+            State
+         end
+      end
+   in
+      {MyUtils.newPortObject 1+({OS.rand} mod 4) Inbox}
+   end
+end

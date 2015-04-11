@@ -1,0 +1,92 @@
+functor
+import
+   Gui
+   Utils
+export
+   Trainer
+define
+   fun {Trainer Id Game}
+      
+      fun {FightTrainer PlayerPokemoz OtherPlayerPokemoz}
+	 
+      end
+
+      fun {FightPokemoz PlayerPokemoz OtherPokemoz}
+	 
+      end
+
+      fun {ShouldFight Poke OtherPoke}
+	 true
+      end
+      
+      fun {Inbox State Msg}
+	 case State of state(waiting Direction Pokemon) then
+	    
+	    case Msg of play(Position Object) then
+	       state(playing Direction Position Pokemon)
+	    [] wildpokemoz(Position OtherPokemoz) then
+	       if Utils.AutoFight then
+		  PokemozXP = {FightPokemoz Pokemoz OtherPokemoz}
+	       else
+		  % check if we should fight or not 
+		  if {ShouldFight Pokemoz OtherPokemoz} then
+		     PokemozXP = {FightPokemoz Pokemoz OtherPokemoz}
+		  else
+		     PokemozXP = Pokemoz
+		  end
+	       end
+	    in
+	       {Gui.updateText PokemonzXP}
+	       state(waiting Direction PokemozXP)
+	    [] player(Postion OtherPlayer) then
+	       % get the pokemoz from other player then fight
+	       PokemozXP = {FightPokemoz Pokemoz {Send OtherPlayer.port getPokemoz()}}
+	    in
+	       {Gui.updateText PokemonzXP}
+	       state(waiting Direction PokemozXP)
+	    [] invalidaction(Position Msg) then
+	       if Msg == dead then
+		  State
+	       else
+		  state(playing Dir Position Pokemon)
+	       end
+	    else
+	       State
+	    end
+
+	 [] state(playing Direction Position Pokemoz) then
+	    case Msg of move(MoveType) then
+	       {Gui.drawPlayer brave(port:_ pos:Pos) NewDir}
+	       {Send Game move(Id {Utils.CalculateNewPos Position MoveType} NewDir)}
+	       state(waiting MoveType Pokemon)
+	    [] wildpokemoz(OtherPokemoz) then
+	        if Utils.AutoFight then
+		  PokemozXP = {FightPokemoz Pokemoz OtherPokemoz}
+	       else
+		  % check if we should fight or not 
+		  if {ShouldFight Pokemoz OtherPokemoz} then
+		     PokemozXP = {FightPokemoz Pokemoz OtherPokemoz}
+		  else
+		     PokemozXP = Pokemoz
+		  end
+	       end
+	    in
+	       {Gui.updateText PokemonzXP}
+	       state(playing Direction Position PokemozXP)
+	    [] player(OtherPlayer) then
+	       % get the pokemoz from other player then fight
+	       PokemozXP = {FightPokemoz Pokemoz {Send OtherPlayer.port getPokemoz()}}
+	    in
+	       {Gui.updateText PokemonzXP}
+	       state(playing Direction Position PokemozXP)
+	    else
+	       State
+	    end
+	 end
+      end
+   in
+      % creating new player with up direction and initial Pokemon
+      {Utils.newPortObject state(waiting up Pokemon) Inbox}
+
+   end
+end
