@@ -2,18 +2,9 @@ functor
 import
    QTk at 'x-oz://system/wp/QTk.ozf'
    OS
+   Utils
 export
-   GetAt
-   DeleteAt
-   GameFinished
-   LoadTextures
-   LoadMapWindow
-   ShowWindow
-   CloseWindow
-
-   DrawMap
-   DrawPlayer
-   UpdateText
+   Gui
 define
    WidthInCell
    HeightInCell
@@ -40,12 +31,15 @@ define
    Window
    Grid
    TextCanvas
-   
+
+%%%%%%%%%% GUI Utils see below for Gui Port Object %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    fun {GetAt Map X Y}
       if X > 0 andthen X =< WidthInCell andthen Y > 0 andthen Y =< HeightInCell then
-         Map.Y.X
+         {Utils.printf Map.Y.X}
+	 Map.Y.X
       else
-         ~1
+	{Utils.printf "Exception"}
+	 ~1
       end
    end
 
@@ -54,14 +48,14 @@ define
    in
       NewMap = {MakeTuple 'map' HeightInCell}
       for I in 1..HeightInCell do
-         NewMap.I = {MakeTuple 'r' WidthInCell}
-         for J in 1..WidthInCell do
-            if I == Y andthen J == X then
-               NewMap.I.J = 0
-            else
-               NewMap.I.J = Map.I.J
-            end
-         end
+	 NewMap.I = {MakeTuple 'r' WidthInCell}
+	 for J in 1..WidthInCell do
+	    if I == Y andthen J == X then
+	       NewMap.I.J = 0
+	    else
+	       NewMap.I.J = Map.I.J
+	    end
+	 end
       end
       NewMap
    end
@@ -80,8 +74,8 @@ define
    proc {DrawMap Map Position}
       % Path = 0 and Grass = 1 but need to add one because start at 1
       local TextureNumber in
-      TextureNumber =  {GetAt Map Position.x Position.y}+1
-      {DrawImage MapTextures.TextureNumber Position}
+	 TextureNumber =  {GetAt Map Position.x Position.y}+1
+	 {DrawImage MapTextures.TextureNumber Position}
       end
    end
    
@@ -97,36 +91,36 @@ define
       PlayerIcon
    in
       if {Label Player} == trainer then
-         PlayerIcon = Trainer
+	 PlayerIcon = Trainer
       else
-         if Direction == up then PlayerIcon = PlayerUp
-         elseif Direction == left then PlayerIcon = PlayerLeft
-         elseif Direction == down then PlayerIcon = PlayerDown
-         else PlayerIcon = PlayerRight
-         end
+	 if Direction == up then PlayerIcon = PlayerUp
+	 elseif Direction == left then PlayerIcon = PlayerLeft
+	 elseif Direction == down then PlayerIcon = PlayerDown
+	 else PlayerIcon = PlayerRight
+	 end
       end
       {Grid create(image WidthCell*Player.pos.x-(WidthCell div 2) HeightCell*Player.pos.y-(HeightCell div 2) image:PlayerIcon)}
    end
 
-   proc {InitLayout Map Players}
-
+   proc {InitLayout Map}
       % draw the map textures
       for I in 1..WidthInCell do
-         for J in 1..HeightInCell do
-            {DrawMap Map p(x:I y:J)}
-         end
+	 for J in 1..HeightInCell do
+	    {DrawMap Map p(x:I y:J)}
+	 end
       end
-
-      % draw the players
-      for I in 1..{Width Players} do
-         {DrawPlayer Players.I up}
-      end
-      
-      % Update info text
-      %{UpdateText Pokemon 1}
    end
 
-   proc {LoadTextures Map}
+   proc {UpdatePlayers Players}
+       % draw the players
+      for I in 1..{Width Players} do
+	 {DrawPlayer Players.I up}
+      end
+   end
+
+
+   
+   proc {LoadTextures}
       CD = {OS.getCWD}
       
       % textures
@@ -145,9 +139,22 @@ define
       MapTextures = images(Path Grass)
    end
 
-   proc {LoadMapWindow Map Players Game Grass Path}
+ 
+
+   proc {ShowWindow}
+      {Window show}
+   end
+   
+   proc {CloseWindow}
+      {Send Trainer close()}
+      {Window close}
+   end
+      
+   proc {LoadMapWindow Map}
       Desc
    in
+      % Loading textures from files
+      {LoadTextures}
       WidthInCell = {Record.width Map.1}
       HeightInCell = {Record.width Map}
       WidthCell = 40
@@ -155,32 +162,58 @@ define
       HeightText = 10
       MapWidth = WidthCell * WidthInCell
       MapHeight = HeightCell * HeightInCell
-      
+	 
       Desc=td(
-              lr(canvas(bg:gray
-                        width:MapWidth
-                        height:HeightCell
-                        handle:TextCanvas))
-              lr(canvas(bg:white
-                        width:MapWidth
-                        height:MapHeight
-                        handle:Grid)))
+	      lr(canvas(bg:gray
+			width:MapWidth
+			height:HeightCell
+			handle:TextCanvas))
+	      lr(canvas(bg:white
+			width:MapWidth
+			height:MapHeight
+			handle:Grid)))
       Window={QTk.build Desc}
-
-      {InitLayout Map Players}
-      {Window bind(event:"<Up>" action:proc{$} {Send Players.1.port move(up)} end)}
-      {Window bind(event:"<Left>" action:proc{$} {Send Players.1.port move(left)} end)}
-      {Window bind(event:"<Down>" action:proc{$} {Send Players.1.port move(down)}  end)}
-      {Window bind(event:"<Right>" action:proc{$} {Send Players.1.port move(right)} end)}
-      {Window bind(event:"<space>" action:proc{$} {Send Game finish} end)}
-      %{Window bind(event:"<Escape>" action:proc{$} {End.endGame} end)}
+	 
+      {InitLayout Map}
+      {Window bind(event:"<Up>" action:proc{$} {Send Trainer.port move(up)} end)}
+      {Window bind(event:"<Left>" action:proc{$} {Send Trainer.port move(left)} end)}
+      {Window bind(event:"<Down>" action:proc{$} {Send Trainer.port move(down)}  end)}
+      {Window bind(event:"<Right>" action:proc{$} {Send Trainer.port move(right)} end)}
+      {Window bind(event:"<Escape>" action:proc{$} {CloseWindow} end)}
    end
 
-   proc {ShowWindow}
-      {Window show}
-   end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   proc {CloseWindow}
-      {Window close}
+   fun {Gui Trainer InitialMap}
+      
+      fun{Inbox State Msg}
+	 case State of state(starting) then
+	    case Msg of start then
+	       {Utils.printf "build gui map"}
+	       {LoadMapWindow InitialMap}
+	       {Utils.printf "showing windows"}
+	       {ShowWindow}
+	       state(listening)
+	    end
+	
+	 [] state(listening) then
+	    case Msg of mapchanged(Map Players) then
+	       {UpdatePlayers Players}
+	       {Utils.printf "updating map"}
+	       State
+	    [] lost then
+	       {Utils.printf "lost"}
+	       State
+	    [] win then
+	       {Utils.printf "won"}
+	       State
+	    else
+	       State
+	    end
+	 end
+      end
+   in
+      {Utils.newPortObject state(starting) Inbox}
    end
+   
 end

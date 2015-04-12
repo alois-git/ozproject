@@ -5,9 +5,8 @@ import
    System
    OS
    Gui
-
    Utils
-   Game
+   GameServer
    Trainer
 define
    %% Default values
@@ -32,12 +31,11 @@ define
               help(single char:&h default:false)
               )}
 
-   fun {InitPlayers Game Map}
+   fun {InitPlayers Game Gui}
       Players = {MakeTuple players 1}
       Pokemoz = pokemoz(hp:20 lvl:5)
       PositionPlayer = pos(x:0 y:0)
-      Players.1 = player(port:{Trainer.trainer 1 Game Pokemoz} pos:PositionPlayer)
-      
+      Players.1 = player(port:{Trainer.trainer 1 Game Gui} pos:PositionPlayer)      
       Players
    end
 
@@ -62,24 +60,20 @@ define
       {Utils.printf "#Speed :\t"#Args.speed}
       {Utils.printf "#Probability of wild pokemon:\t"#Args.wildprobability}
       
-      local Players Map in
+      local Players Map GuiObject in
 	 {Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
 	 {Utils.printf "load map file"}
-	 Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
-	 {Gui.loadTextures Map}
+	 %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
+	 Map = map( r(1 1 1 0 0 0 0) r(1 1 1 0 0 1 1) r(1 1 1 0 0 1 1) r(0 0 0 0 0 1 1) r(0 0 0 1 1 1 1) r(0 0 0 1 1 0 0) r(0 0 0 0 0 0 0))
 
 	 {Utils.printf "Init player"}
-	 Players = {InitPlayers Game Map}
-	 {Utils.printf Map}
-	 {Utils.printf Players.1.pos.x}
+	 Players = {InitPlayers Game GuiObject}
+	 {Utils.printf "load gui"}
+	 GuiObject = {Gui.gui Players.1.port Map}
 	 {Utils.printf "Init game"}
-	 Game = {Game.game Map Players}
+	 Game = {GameServer.gameServer Map Players}
 
-	 {Utils.printf "load window"}
-	 {Gui.loadMapWindow Map Players Game}
-
-	 {Utils.printf "Show window"}
-	 {Gui.showWindow}
+	 {Utils.printf "Start game"}
 	 {Send Game start}
       end
 

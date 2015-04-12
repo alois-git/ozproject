@@ -17,8 +17,8 @@ run: PokemozMain.ozf
 .oz.ozf:
 	ozc -c $< -o $@
 
-Game.ozf: Game.oz
-	ozc -c Game.oz
+GameServer.ozf: GameServer.oz
+	ozc -c GameServer.oz
 
 Trainer.ozf: Trainer.oz Utils.ozf
 	ozc -c Trainer.oz
@@ -29,7 +29,7 @@ Utils.ozf: Utils.oz
 Gui.ozf: Gui.oz
 	ozc -c Gui.oz
 
-PokemozMain.ozf: PokemozMain.oz Gui.ozf Utils.ozf Game.ozf Trainer.ozf
+PokemozMain.ozf: PokemozMain.oz Gui.ozf Utils.ozf GameServer.ozf Trainer.ozf
 	ozc -c PokemozMain.oz
 
 clean:
