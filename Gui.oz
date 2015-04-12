@@ -28,6 +28,7 @@ define
    PokemozWater
    Trainer
    MapTextures
+   PokemozTextures
 
    Window
    Grid
@@ -64,10 +65,13 @@ define
       {DrawText Text p(x:(3*(WidthInCell div 4)) y:1)}
    end
    
-   proc {UpdateText Objects}
-      {TextCanvas create(rect 0 0 MapWidth HeightCell fill:gray outline:black)}
-      {DrawText "Pokemon:\t"#Objects#" / "#TargetObjects p(x:5 y:1)}
-      {DrawText "Press escape to exit" p(x:(3*(WidthInCell div 4)) y:3)}
+   proc {UpdateText}
+      {TextCanvas create(rect 0 0 MapWidth HeightCell*2 fill:gray outline:gray)}
+      {DrawText "Name:\t" p(x:2 y:1)}
+      {DrawText "Pokemon:\t" p(x:2 y:2)}
+      {DrawText "Hp:\t" p(x:3 y:3)}
+      {DrawText "Level:\t" p(x:3 y:4)}
+      {DrawImageTextCanvas PokemozGrass p(x:5 y:2)}
    end
    
    proc {DrawMap Map Position}
@@ -76,6 +80,10 @@ define
 	 TextureNumber =  {GetAt Map Position.x Position.y}+1
 	 {DrawImage MapTextures.TextureNumber Position}
       end
+   end
+
+   proc {DrawImageTextCanvas Image Position}
+      {TextCanvas create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:Image)}
    end
    
    proc {DrawImage Image Position}
@@ -118,16 +126,13 @@ define
       Grass = {QTk.newImage photo(file:CD#'/images/grass.gif')}        
       Path = {QTk.newImage photo(file:CD#'/images/path.gif')}         
       Trainer = {QTk.newImage photo(file:CD#'/images/trainer.gif')}   
-      PlayerUp = {QTk.newImage photo(file:CD#'/images/braveup.gif')}
-      PlayerDown = {QTk.newImage photo(file:CD#'/images/bravedown.gif')}
-      PlayerLeft = {QTk.newImage photo(file:CD#'/images/braveleft.gif')}
-      PlayerRight = {QTk.newImage photo(file:CD#'/images/braveright.gif')}
       PokemozGrass = {QTk.newImage photo(file:CD#'/images/pGrass.gif')}
       PokemozFire =  {QTk.newImage photo(file:CD#'/images/pFire.gif')}
-      PokemozWater =  {QTk.newImage photo(file:CD#'/images/pWate.gif')}
+      PokemozWater =  {QTk.newImage photo(file:CD#'/images/pWater.gif')}
 
       % Path = 0 and Grass = 1 but need to add one because start at 1
-      MapTextures = images(Path Grass)
+      MapTextures = maptextures(Path Grass)
+      PokemozTextures = poketextures(PokemozGrass PokemozFire PokemozWater)
    end
 
  
@@ -175,15 +180,16 @@ define
       Desc=td(
 	      lr(canvas(bg:gray
 			width:MapWidth
-			height:HeightCell
+			height:HeightCell*2
 			handle:TextCanvas))
-	      lr(canvas(bg:white
+	      lr(canvas(bg:gray
 			width:MapWidth
 			height:MapHeight
 			handle:Grid)))
       Window={QTk.build Desc}
 	 
       {UpdateMap Map}
+      {UpdateText}
       {Window bind(event:"<Up>" action:proc{$} {Send Trainer move(up)} end)}
       {Window bind(event:"<Left>" action:proc{$} {Send Trainer move(left)} end)}
       {Window bind(event:"<Down>" action:proc{$} {Send Trainer move(down)}  end)}
