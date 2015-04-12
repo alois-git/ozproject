@@ -28,12 +28,13 @@ define
 	    local Pokemoz in 
 	       Pokemoz = pokemoz(type:grass maxhp:20 hp:20 lvl:5)
 	       state(waiting Direction Pokemoz)
-	    end
-	    end
+	    end end
 	 [] state(waiting Direction Pokemoz) then
-	    case Msg of play(Position Object) then
+	    case Msg of play(Position) then
 	       state(playing Direction Position Pokemoz)
 	    [] wildpokemoz(WildPokemoz) then
+	       {Utils.printf "there is a wild"}
+               {Send Gui choicewild(WildPokemoz)}
 	       State
 	    [] playerfight(OtherPlayer) then
 	       State
@@ -56,8 +57,17 @@ define
 	    case Msg of move(MoveType) then
 	       {Send GameServer move(Id {Utils.calculateNewPos Position MoveType} MoveType)}
 	       state(waiting MoveType Pokemoz)
-	    [] wildpokemoz(OtherPokemoz) then
+	    [] wildpokemoz(WildPokemoz) then
+               {Utils.printf "there is a wild"}
+               {Send Gui choicewild(WildPokemoz)}
 	       State
+            [] guiwildchoice(Choice WildPokemoz) then
+               if Choice == true then
+                  {Send GameServer fight(Id WildPokemoz)}
+               else
+                  {Send GameServer runway(Id WildPokemoz)}
+               end
+               State
 	    [] playerfight(OtherPlayer) then
 	       State
 	    [] fightresult(Result) then

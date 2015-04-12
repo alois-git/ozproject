@@ -20,6 +20,7 @@ define
    Pokemoz
    PositionPlayer
    A
+   RoundLoop
 
    %% Posible arguments
    Args = {Application.getArgs
@@ -34,10 +35,11 @@ define
    fun {InitPlayers Game Gui}
       Players = {MakeTuple players 1}
       Pokemoz = pokemoz(hp:20 lvl:5)
-      PositionPlayer = pos(x:0 y:0)
+      PositionPlayer = pos(x:7 y:7)
       Players.1 = player(port:{Trainer.trainer 1 Game Gui} pos:PositionPlayer)      
       Players
    end
+
 
    local
       Game
@@ -75,6 +77,17 @@ define
 
 	 {Utils.printf "Start game"}
 	 {Send Game start}
+
+   proc {RoundLoop}
+           {Time.delay DELAY}    
+	   {Send Game round}
+           {RoundLoop}
+   end
+
+	 thread
+        	  {RoundLoop}
+	 end
+
       end
 
       {Wait A}

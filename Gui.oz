@@ -1,6 +1,7 @@
 functor
 import
    QTk at 'x-oz://system/wp/QTk.ozf'
+   System
    OS
    Utils
 export
@@ -35,10 +36,8 @@ define
 %%%%%%%%%% GUI Utils see below for Gui Port Object %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    fun {GetAt Map X Y}
       if X > 0 andthen X =< WidthInCell andthen Y > 0 andthen Y =< HeightInCell then
-         {Utils.printf Map.Y.X}
 	 Map.Y.X
       else
-	{Utils.printf "Exception"}
 	 ~1
       end
    end
@@ -90,19 +89,11 @@ define
    proc {DrawPlayer Player Direction}
       PlayerIcon
    in
-      if {Label Player} == trainer then
-	 PlayerIcon = Trainer
-      else
-	 if Direction == up then PlayerIcon = PlayerUp
-	 elseif Direction == left then PlayerIcon = PlayerLeft
-	 elseif Direction == down then PlayerIcon = PlayerDown
-	 else PlayerIcon = PlayerRight
-	 end
-      end
+	PlayerIcon = Trainer
       {Grid create(image WidthCell*Player.pos.x-(WidthCell div 2) HeightCell*Player.pos.y-(HeightCell div 2) image:PlayerIcon)}
    end
 
-   proc {InitLayout Map}
+   proc {UpdateMap Map}
       % draw the map textures
       for I in 1..WidthInCell do
 	 for J in 1..HeightInCell do
@@ -140,6 +131,19 @@ define
    end
 
  
+   fun {AskChoiceWild}
+    local Y 
+       Desc=lr(button(text:"Yes" 
+                      return:Y
+                      action:toplevel#close)
+               button(text:"No" 
+                      action:toplevel#close))
+    in 
+       {{QTk.build Desc} show}
+       if Y then true else false end 
+    end
+  
+   end
 
    proc {ShowWindow}
       {Window show}
@@ -149,7 +153,11 @@ define
       {Send Trainer close()}
       {Window close}
    end
-      
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   fun {Gui Trainer InitialMap}
+
    proc {LoadMapWindow Map}
       Desc
    in
@@ -174,17 +182,13 @@ define
 			handle:Grid)))
       Window={QTk.build Desc}
 	 
-      {InitLayout Map}
-      {Window bind(event:"<Up>" action:proc{$} {Send Trainer.port move(up)} end)}
-      {Window bind(event:"<Left>" action:proc{$} {Send Trainer.port move(left)} end)}
-      {Window bind(event:"<Down>" action:proc{$} {Send Trainer.port move(down)}  end)}
-      {Window bind(event:"<Right>" action:proc{$} {Send Trainer.port move(right)} end)}
+      {UpdateMap Map}
+      {Window bind(event:"<Up>" action:proc{$} {Send Trainer move(up)} end)}
+      {Window bind(event:"<Left>" action:proc{$} {Send Trainer move(left)} end)}
+      {Window bind(event:"<Down>" action:proc{$} {Send Trainer move(down)}  end)}
+      {Window bind(event:"<Right>" action:proc{$} {Send Trainer move(right)} end)}
       {Window bind(event:"<Escape>" action:proc{$} {CloseWindow} end)}
    end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-   fun {Gui Trainer InitialMap}
       
       fun{Inbox State Msg}
 	 case State of state(starting) then
@@ -198,9 +202,12 @@ define
 	
 	 [] state(listening) then
 	    case Msg of mapchanged(Map Players) then
+               {UpdateMap Map}
 	       {UpdatePlayers Players}
-	       {Utils.printf "updating map"}
 	       State
+            [] choicewild(OtherPokemoz) then
+	       {Send Trainer guiwildchoice({AskChoiceWild} OtherPokemoz)}
+               State
 	    [] lost then
 	       {Utils.printf "lost"}
 	       State

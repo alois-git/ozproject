@@ -28,13 +28,13 @@ define
 
    fun {CalculateNewPos P MoveType}
       case MoveType of up then
-	 p(x:P.x+1 y:P.y)
-      [] down then
-	 p(x:P.x-1 y:P.y)
-      [] left then
 	 p(x:P.x y:P.y-1)
+      [] down then
+	 p(x:P.x y:P.y+1)
+      [] left then
+	 p(x:P.x-1 y:P.y)
       [] right then
-	 p(x:P.x+1 y:P.y+1)
+	 p(x:P.x+1 y:P.y)
       end
    end
 
