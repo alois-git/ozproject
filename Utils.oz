@@ -21,7 +21,7 @@ define
   
    PokemozMaxHp = pokemozmaxhp(20 22 24 26 28 30)
    
-   PokemozXPNeeded = pokemozxpneeded(0 5 12 20 30 50)
+   PokemozXPNeeded = pokemozxpneeded(5 12 20 30 50)
 
    fun {NewPortObject Init Fun}  
       proc {MsgLoop S1 State}
@@ -65,6 +65,6 @@ define
 
    MoveType = movetype(up down right left)
 
-   AutoFight = 0
+   AutoFight = 2
 
 end

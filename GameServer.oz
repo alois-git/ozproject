@@ -5,9 +5,8 @@ import
 export
    GameServer
 define
-   WILDPOKEMOZPROBA = 30
-
-   fun {GameServer Map Players}
+   DELAY = 200
+   fun {GameServer Map Players WILDPOKEMOZPROBA}
 
       % function to see if there is a wild pokemoz in the grass
       fun {IsThereWildPokemoz}
@@ -18,8 +17,8 @@ define
       fun {GenerateRandomPokemoz Pokemoz}
 	 local T Lvl in
 	    T = ({OS.rand} mod 3)+1
-            Lvl = 5 + ({OS.rand} mod (Pokemoz.lvl-4))
-	    pokemoz(hp:Utils.pokemozMaxHp.Lvl lvl:Lvl type:Utils.pokemozType.T maxhp:Utils.pokemozMaxHp.Lvl name:"wild pokemoz")
+            Lvl = 5 %+ ({OS.rand} mod (Pokemoz.lvl-5))
+	    pokemoz(hp:Utils.pokemozMaxHp.Lvl lvl:Lvl type:Utils.pokemozType.T maxhp:Utils.pokemozMaxHp.Lvl name:"wild pokemoz" xp:0)
 	 end
       end
 
@@ -27,7 +26,7 @@ define
 	 local Proba R in 
 	    Proba = (( 6 + Pokemoz1.lvl - Pokemoz2.lvl) * 9)
 	    R = {OS.rand}  mod 101
-	    if R < Proba then
+	    if R > Proba then
 	       %{Utils.printf Pokemoz1.name#" attack failed"}
 	       0
 	    else
@@ -62,17 +61,33 @@ define
 	    local DamageBy1 DamageBy2 NewPok1 NewPok2 in
 	       DamageBy1 = {GetDamages Pokemoz1 Pokemoz2}
 	       DamageBy2 = {GetDamages Pokemoz2 Pokemoz1}
-	       NewPok1 = pokemoz(type:Pokemoz1.type maxhp:Pokemoz1.maxhp hp:Pokemoz1.hp-DamageBy2 lvl:Pokemoz1.lvl name:Pokemoz1.name)
-	       NewPok2 = pokemoz(type:Pokemoz2.type maxhp:Pokemoz2.maxhp hp:Pokemoz2.hp-DamageBy1 lvl:Pokemoz2.lvl name:Pokemoz2.name)
+	       NewPok1 = pokemoz(type:Pokemoz1.type maxhp:Pokemoz1.maxhp hp:Pokemoz1.hp-DamageBy2 lvl:Pokemoz1.lvl name:Pokemoz1.name xp:Pokemoz1.xp)
+	       NewPok2 = pokemoz(type:Pokemoz2.type maxhp:Pokemoz2.maxhp hp:Pokemoz2.hp-DamageBy1 lvl:Pokemoz2.lvl name:Pokemoz2.name xp:Pokemoz2.xp)
 	       {Fight NewPok1 NewPok2}
 	    end
 	 else
 	    if Pokemoz1.hp > 0 then
-	       fightresult(Pokemoz1 win)
+	       fightresult({GainXP Pokemoz1 Pokemoz2.lvl} win)
 	    else
 	       fightresult(Pokemoz1 lost)
 	    end
 	 end
+      end
+
+      fun {GainXP Pokemoz XP}
+	local IndexLvl CurrentXP NeededXPToLvlUp NewXP NewLvl NewMaxHp in
+          CurrentXP = Pokemoz.xp + XP
+          IndexLvl = Pokemoz.lvl-4
+          NeededXPToLvlUp = Utils.pokemozXPNeeded.IndexLvl
+          if CurrentXP > NeededXPToLvlUp then
+            NewXP = CurrentXP - NeededXPToLvlUp
+            NewLvl = Pokemoz.lvl+1
+            NewMaxHp = Utils.pokemozMaxHp.(NewLvl-4)
+            pokemoz(type:Pokemoz.type maxhp:NewMaxHp hp:NewMaxHp lvl:NewLvl name:Pokemoz.name xp:NewXP)
+          else
+            pokemoz(type:Pokemoz.type maxhp:Pokemoz.maxhp hp:Pokemoz.hp lvl:Pokemoz.lvl name:Pokemoz.name xp:CurrentXP)
+          end  
+	end
       end
 
       % get what type of area is at that position
@@ -105,7 +120,6 @@ define
 	 local NewPlayers in
 	    NewPlayers = {MakeTuple players {Width Players}}
 	    for I in 1..{Width Players} do
-     
 	       if I == Id then
 		  NewPlayers.I = player(port:Player.port pos:NewPosition)   
 	       else
@@ -115,6 +129,8 @@ define
 	    NewPlayers
 	 end
       end
+	
+
 
       fun {Inbox State Msg}
 	 case State of state(starting Map Players) then
@@ -131,11 +147,12 @@ define
 	 [] state(listening Map Players) then
 	    case Msg of stop then
 	       state(stopped)
-	    [] round then
-	       for I in 1..{Width Players} do
-		  {Send Players.I.port play(Players.I.pos)}
-	       end
+	    [] round(I) then
+	       {Send Players.I.port play(Players.I.pos)}
 	       State
+            [] getplayers(Id P) then
+               P = Players.Id.port
+               State
 	    [] move(Id Position Direction) then
 	       local Obj UpdatedPlayers Wild in
 		  % Get what type of area it is at that position (grass/road/trainer)
@@ -149,7 +166,7 @@ define
 		     State
 		  else
 		     UpdatedPlayers = {UpdatePlayerPosition Id Players.Id Position}
-		     {Send Players.Id.port mapchanged(Map UpdatedPlayers)}
+		     {Send UpdatedPlayers.Id.port mapchanged(Map UpdatedPlayers)}
 		     % if we are in a grass area check wilpokemoz, danger ! 
 		     if Obj == 1 then
 			if {IsThereWildPokemoz} == true then
@@ -167,7 +184,6 @@ define
 	       State
 	    [] fight(Id PlayerPokemoz OtherPokemoz) then
 	       {Utils.printf "fighting a pokemon"}
-	      
 	       {Send Players.Id.port {Fight PlayerPokemoz OtherPokemoz}}
 	       State
 	    [] quit() then

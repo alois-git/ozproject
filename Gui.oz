@@ -65,14 +65,29 @@ define
       {DrawText Text p(x:(3*(WidthInCell div 4)) y:1)}
    end
    
-   proc {UpdateText}
+   proc {UpdatePlayerInfo Player}
+      local P in
+	 {Send Player.port getpokemoz(P)}
+	 {TextCanvas create(rect 0 0 MapWidth HeightCell*2 fill:gray outline:gray)}
+	 {DrawText "Name:\t"#P.name p(x:2 y:1)}
+	 {DrawText "Pokemon:\t"#P.name p(x:2 y:2)}
+	 {DrawText "HP:\t"#P.hp p(x:3 y:3)}
+         {DrawText "XP:\t"#P.xp p(x:3 y:4)}
+	 {DrawText "Level:\t"#P.lvl p(x:3 y:5)}
+	 {DrawImageTextCanvas PokemozGrass p(x:5 y:2)}
+      end
+   end
+
+   proc {UpdatePlayerPokemozInfo P}
       {TextCanvas create(rect 0 0 MapWidth HeightCell*2 fill:gray outline:gray)}
-      {DrawText "Name:\t" p(x:2 y:1)}
-      {DrawText "Pokemon:\t" p(x:2 y:2)}
-      {DrawText "Hp:\t" p(x:3 y:3)}
-      {DrawText "Level:\t" p(x:3 y:4)}
+      {DrawText "Name:\t"#P.name p(x:2 y:1)}
+      {DrawText "Pokemon:\t"#P.name p(x:2 y:2)}
+      {DrawText "HP:\t"#P.hp p(x:3 y:3)}
+      {DrawText "XP:\t"#P.xp p(x:3 y:4)}
+      {DrawText "Level:\t"#P.lvl p(x:3 y:5)}
       {DrawImageTextCanvas PokemozGrass p(x:5 y:2)}
    end
+   
    
    proc {DrawMap Map Position}
       % Path = 0 and Grass = 1 but need to add one because start at 1
@@ -189,7 +204,6 @@ define
       Window={QTk.build Desc}
 	 
       {UpdateMap Map}
-      {UpdateText}
       {Window bind(event:"<Up>" action:proc{$} {Send Trainer move(up)} end)}
       {Window bind(event:"<Left>" action:proc{$} {Send Trainer move(left)} end)}
       {Window bind(event:"<Down>" action:proc{$} {Send Trainer move(down)}  end)}
@@ -211,10 +225,14 @@ define
 	    case Msg of mapchanged(Map Players) then
                {UpdateMap Map}
 	       {UpdatePlayers Players}
+	       {UpdatePlayerInfo Players.1}
 	       State
             [] choicewild(OtherPokemoz) then
 	       {Send Trainer guiwildchoice({AskChoiceWild OtherPokemoz} OtherPokemoz)}
-               State
+	       State
+	    [] pokemozchanged(Pokemoz) then
+	       {UpdatePlayerPokemozInfo Pokemoz}
+	       State
 	    [] lost then
 	       {Utils.printf "lost"}
 	       State

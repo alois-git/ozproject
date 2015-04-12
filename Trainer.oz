@@ -6,7 +6,7 @@ import
 export
    Trainer
 define
-   fun {Trainer Id GameServer Gui}
+   fun {Trainer Id GameServer Gui AUTOFIGHT}
       
       fun {FightTrainer PlayerPokemoz OtherPlayerPokemoz}
 	 true
@@ -26,19 +26,25 @@ define
 	    {Utils.printf "picking pokemoz"}
 	    {Send Gui start}
 	    local Pokemoz in 
-	       Pokemoz = pokemoz(type:grass maxhp:20 hp:20 lvl:5 name:"mypokemoz")
+	       Pokemoz = pokemoz(type:grass maxhp:20 hp:20 lvl:5 name:"mypokemoz" xp:0)
 	       state(waiting Direction Pokemoz)
 	    end end
 	 [] state(waiting Direction Pokemoz) then
 	    case Msg of play(Position) then
 	       state(playing Direction Position Pokemoz)
 	    [] wildpokemoz(WildPokemoz) then
-	       {Utils.printf "there is a wild"}
-               {Send Gui choicewild(WildPokemoz)}
+               if AUTOFIGHT == 0 then
+                {Send GameServer runway(Id WildPokemoz)}
+               elseif AUTOFIGHT == 1 then
+		{Send GameServer fight(Id Pokemoz WildPokemoz)}
+               else
+                {Send Gui choicewild(WildPokemoz)}
+               end
 	       State
 	    [] playerfight(OtherPlayer) then
 	       State
 	    [] fightresult(Pokemoz Result) then
+               {Send Gui pokemozchanged(Pokemoz)}
 	       state(playing Direction Pokemoz)
 	    [] mapchanged(Map Players) then
 	       {Send Gui mapchanged(Map Players)}
@@ -61,8 +67,13 @@ define
 	       {Send GameServer move(Id {Utils.calculateNewPos Position MoveType} MoveType)}
 	       state(waiting MoveType Pokemoz)
 	    [] wildpokemoz(WildPokemoz) then
-               {Utils.printf "there is a wild"}
-               {Send Gui choicewild(WildPokemoz)}
+               if AUTOFIGHT == 0 then
+                {Send GameServer runway(Id WildPokemoz)}
+               elseif AUTOFIGHT == 1 then
+		{Send GameServer fight(Id Pokemoz WildPokemoz)}
+               else
+                {Send Gui choicewild(WildPokemoz)}
+               end
 	       State
             [] guiwildchoice(Choice WildPokemoz) then
                if Choice == true then
@@ -74,7 +85,7 @@ define
 	    [] playerfight(OtherPlayer) then
 	       State
 	    [] fightresult(Pokemoz Result) then
-               {Utils.printf Result}
+               {Send Gui pokemozchanged(Pokemoz)}
 	       state(playing Direction Position Pokemoz)
  	    [] getpokemoz(P) then
                P = Pokemoz
@@ -82,6 +93,8 @@ define
 	    [] mapchanged(Map Players) then
 	       {Send Gui mapchanged(Map Players)}
 	       State
+	    [] invalidaction(Position Msg) then
+               {Utils.printf "invalid move"}
 	    else
 	       State
 	    end
