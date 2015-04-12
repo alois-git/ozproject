@@ -10,9 +10,18 @@ export
    MoveType
    AutoFight
    LoadMapFile
+   PokemozType
+   PokemozMaxHp
+   PokemozXPNeeded
 define
 
    Printf = System.showInfo
+
+   PokemozType = pokemoztype(water grass fire)
+  
+   PokemozMaxHp = pokemozmaxhp(20 22 24 26 28 30)
+   
+   PokemozXPNeeded = pokemozxpneeded(0 5 12 20 30 50)
 
    fun {NewPortObject Init Fun}  
       proc {MsgLoop S1 State}

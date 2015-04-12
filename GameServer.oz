@@ -1,20 +1,78 @@
 functor
 import
    Utils
+   OS
 export
    GameServer
 define
+   WILDPOKEMOZPROBA = 30
 
    fun {GameServer Map Players}
 
       % function to see if there is a wild pokemoz in the grass
       fun {IsThereWildPokemoz}
-	 true
+	 ({OS.rand} mod 100) < WILDPOKEMOZPROBA 
       end
 
-      % Generate a random pokemoz 
-      fun {GenerateRandomPokemoz}
-	 pokemoz(hp:10 lvl:4)
+      % Generate a random pokemoz with a min level of 5 and a random extra level depending on other pokemon
+      fun {GenerateRandomPokemoz Pokemoz}
+	 local T Lvl in
+	    T = ({OS.rand} mod 3)+1
+            Lvl = 5 + ({OS.rand} mod (Pokemoz.lvl-4))
+	    pokemoz(hp:Utils.pokemozMaxHp.Lvl lvl:Lvl type:Utils.pokemozType.T maxhp:Utils.pokemozMaxHp.Lvl name:"wild pokemoz")
+	 end
+      end
+
+      fun {GetDamages Pokemoz1 Pokemoz2}
+	 local Proba R in 
+	    Proba = (( 6 + Pokemoz1.lvl - Pokemoz2.lvl) * 9)
+	    R = {OS.rand}  mod 101
+	    if R < Proba then
+	       %{Utils.printf Pokemoz1.name#" attack failed"}
+	       0
+	    else
+	       %{Utils.printf Pokemoz1.name#" attack succeded"}
+	       if Pokemoz1.type == Pokemoz2.type then
+		  2
+	       elseif Pokemoz1.type == grass then
+		  if Pokemoz2.type == fire then
+		     1
+		  else
+		     3
+		  end
+	       elseif Pokemoz1.type == fire then
+		  if Pokemoz2.type == grass then
+		     3
+		  else
+		     1
+		  end
+	       elseif Pokemoz1.type == water then
+		  if Pokemoz2.type == grass then
+		     1
+		  else
+		     3
+		  end
+	       end
+	    end
+	 end
+      end
+
+      fun {Fight Pokemoz1 Pokemoz2}
+	 if Pokemoz1.hp > 0 andthen Pokemoz2.hp > 0 then
+	    local DamageBy1 DamageBy2 NewPok1 NewPok2 in
+	       DamageBy1 = {GetDamages Pokemoz1 Pokemoz2}
+	       DamageBy2 = {GetDamages Pokemoz2 Pokemoz1}
+	       NewPok1 = pokemoz(type:Pokemoz1.type maxhp:Pokemoz1.maxhp hp:Pokemoz1.hp-DamageBy2 lvl:Pokemoz1.lvl name:Pokemoz1.name)
+	       NewPok2 = pokemoz(type:Pokemoz2.type maxhp:Pokemoz2.maxhp hp:Pokemoz2.hp-DamageBy1 lvl:Pokemoz2.lvl name:Pokemoz2.name)
+	       {Fight NewPok1 NewPok2}
+	    end
+	 else
+	    if Pokemoz1.hp > 0 then
+	       fightresult(Pokemoz1 win)
+	    else
+	       fightresult(Pokemoz1 lost)
+	    end
+	 end
       end
 
       % get what type of area is at that position
@@ -95,7 +153,10 @@ define
 		     % if we are in a grass area check wilpokemoz, danger ! 
 		     if Obj == 1 then
 			if {IsThereWildPokemoz} == true then
-			   {Send Players.Id.port wildpokemoz({GenerateRandomPokemoz})}
+			   local P in
+                           {Send Players.Id.port getpokemoz(P)}
+			   {Send Players.Id.port wildpokemoz({GenerateRandomPokemoz P})}
+			   end
 			end
 		     end
 		     state(listening Map UpdatedPlayers)
@@ -104,8 +165,10 @@ define
 	    [] runway(Id WildPokemoz) then
 	       {Utils.printf "Run away from a wild pokemon CHICKEN :D"}
 	       State
-	    [] fight(Id Pokemoz) then
+	    [] fight(Id PlayerPokemoz OtherPokemoz) then
 	       {Utils.printf "fighting a pokemon"}
+	      
+	       {Send Players.Id.port {Fight PlayerPokemoz OtherPokemoz}}
 	       State
 	    [] quit() then
 	       {Utils.printf "Disconnecting from game"}

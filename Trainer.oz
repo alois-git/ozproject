@@ -26,7 +26,7 @@ define
 	    {Utils.printf "picking pokemoz"}
 	    {Send Gui start}
 	    local Pokemoz in 
-	       Pokemoz = pokemoz(type:grass maxhp:20 hp:20 lvl:5)
+	       Pokemoz = pokemoz(type:grass maxhp:20 hp:20 lvl:5 name:"mypokemoz")
 	       state(waiting Direction Pokemoz)
 	    end end
 	 [] state(waiting Direction Pokemoz) then
@@ -38,11 +38,14 @@ define
 	       State
 	    [] playerfight(OtherPlayer) then
 	       State
-	    [] fightresult(Result) then
-	       State
+	    [] fightresult(Pokemoz Result) then
+	       state(playing Direction Pokemoz)
 	    [] mapchanged(Map Players) then
 	       {Send Gui mapchanged(Map Players)}
 	       State
+            [] getpokemoz(P) then
+               P = Pokemoz
+               State
 	    [] invalidaction(Position Msg) then
 	       if Msg == dead then
 		  State
@@ -63,14 +66,18 @@ define
 	       State
             [] guiwildchoice(Choice WildPokemoz) then
                if Choice == true then
-                  {Send GameServer fight(Id WildPokemoz)}
+                  {Send GameServer fight(Id Pokemoz WildPokemoz)}
                else
                   {Send GameServer runway(Id WildPokemoz)}
                end
                State
 	    [] playerfight(OtherPlayer) then
 	       State
-	    [] fightresult(Result) then
+	    [] fightresult(Pokemoz Result) then
+               {Utils.printf Result}
+	       state(playing Direction Position Pokemoz)
+ 	    [] getpokemoz(P) then
+               P = Pokemoz
 	       State
 	    [] mapchanged(Map Players) then
 	       {Send Gui mapchanged(Map Players)}

@@ -131,12 +131,13 @@ define
    end
 
  
-   fun {AskChoiceWild}
+   fun {AskChoiceWild OtherPokemoz}
     local Y 
-       Desc=lr(button(text:"Yes" 
+       Desc=lr(label(init: "A wild pokemoz is attacking you what do you want to do ? \n Level: "#OtherPokemoz.lvl#" HP : "#OtherPokemoz.hp#" Type : "#OtherPokemoz.type)
+		button(text:"Attack" 
                       return:Y
                       action:toplevel#close)
-               button(text:"No" 
+               button(text:"Run away" 
                       action:toplevel#close))
     in 
        {{QTk.build Desc} show}
@@ -206,7 +207,7 @@ define
 	       {UpdatePlayers Players}
 	       State
             [] choicewild(OtherPokemoz) then
-	       {Send Trainer guiwildchoice({AskChoiceWild} OtherPokemoz)}
+	       {Send Trainer guiwildchoice({AskChoiceWild OtherPokemoz} OtherPokemoz)}
                State
 	    [] lost then
 	       {Utils.printf "lost"}
