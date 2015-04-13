@@ -162,8 +162,19 @@ define
     in 
        {{QTk.build Desc} show}
        if Y then true else false end 
-    end
-  
+    end  
+   end
+
+  fun {Lost}
+    local Y 
+       Desc=lr(label(init: "Your pokemoz got  killed, you have lost ! sad :( ")
+		button(text:"Leave"
+                      return:Y
+                      action:toplevel#close))
+    in 
+       {{QTk.build Desc} show}
+       if Y then true else true end 
+    end  
    end
 
    proc {ShowWindow}
@@ -171,7 +182,6 @@ define
    end
    
    proc {CloseWindow}
-      {Send Trainer close()}
       {Window close}
    end
 
@@ -234,7 +244,10 @@ define
 	       {UpdatePlayerPokemozInfo Pokemoz}
 	       State
 	    [] lost then
-	       {Utils.printf "lost"}
+               if {Lost} == true then
+                 {CloseWindow}
+	         {Send Trainer quit}
+               end
 	       State
 	    [] win then
 	       {Utils.printf "won"}

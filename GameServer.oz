@@ -4,8 +4,16 @@ import
    OS
 export
    GameServer
+   WaitEndGame
 define
    DELAY = 200
+   WaitEnd
+   WaitEndGame
+
+   proc {WaitEndGame}
+      {Wait WaitEnd}
+   end
+
    fun {GameServer Map Players WILDPOKEMOZPROBA}
 
       % function to see if there is a wild pokemoz in the grass
@@ -129,8 +137,6 @@ define
 	    NewPlayers
 	 end
       end
-	
-
 
       fun {Inbox State Msg}
 	 case State of state(starting Map Players) then
@@ -145,9 +151,7 @@ define
 	       {Utils.printf "server not started please start the server"}
 	    end
 	 [] state(listening Map Players) then
-	    case Msg of stop then
-	       state(stopped)
-	    [] round(I) then
+	    case Msg of round(I) then
 	       {Send Players.I.port play(Players.I.pos)}
 	       State
             [] getplayers(Id P) then
@@ -186,10 +190,15 @@ define
 	       {Utils.printf "fighting a pokemon"}
 	       {Send Players.Id.port {Fight PlayerPokemoz OtherPokemoz}}
 	       State
-	    [] quit() then
-	       {Utils.printf "Disconnecting from game"}
+	    [] quit then
+	       {Utils.printf "shutting down game server"}
+               state(stopped)
+	    else
+	       {Utils.printf "invalid message"}
 	    end
 	 [] state(stopped) then
+            {Utils.printf "setting waitend"}
+            WaitEnd = true
 	    state(stopped)
 	 end
       end

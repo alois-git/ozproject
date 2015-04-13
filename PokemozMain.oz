@@ -88,16 +88,17 @@ define
            end
    	end
 	
-	 for I in 1..{Width Players} do
-           thread
+        for I in 1..{Width Players} do
+          thread
             {RoundLoop I ((10 -Players.I.speed) * DELAY)}
-	   end
-         end
+	  end
+        end
 	
 
       end
 
-      {Wait A}
+      {GameServer.waitEndGame}
+      {Utils.printf "Leaving app"}
       {Application.exit 0}
    end
 end
