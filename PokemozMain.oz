@@ -12,7 +12,7 @@ define
    MAP = map
    WILDPOKEMOZPROBA = 30
    NBPOKEMOZ = 1
-   DEFAULTSPEED = 5
+   DEFAULTSPEED = 9
    DELAY = 200
    RUNAWAYPROBA = 50
    AUTOFIGHT = 2
@@ -77,17 +77,15 @@ define
 	 {Utils.printf "Start game"}
 	 {Send Game start}
 
-   	proc {RoundLoop I Delay}
+   	proc {RoundLoop Delay}
             {Time.delay Delay}    
-	    {Send Game round(I)}
-            {RoundLoop I Delay}
+	    {Send Game round}
+            {RoundLoop Delay}
    	end
 	
-        for I in 1..{Width Players} do
           thread
-            {RoundLoop Players.I.id ((10 -Players.I.speed) * 200)}
+            {RoundLoop ((10 - Args.speed) * 200)}
 	  end
-        end
 	
 
       end

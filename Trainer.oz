@@ -24,7 +24,7 @@ define
    	if Result == win then
                   {Send Gui pokemozchanged(Pokemoz)}
                   if Position == none then
-                     state(playing Direction Position Pokemoz)
+                     state(waiting Direction Pokemoz)
                   else
                      state(playing Direction Position Pokemoz)
                   end
@@ -63,7 +63,7 @@ define
 	    end end
          [] state(lost) then
             case Msg of quit then
-               {Send GameServer quit}
+               {Send GameServer leave(Id)}
                State
             else
 	       State
@@ -83,6 +83,13 @@ define
             [] getpokemoz(P) then
                P = Pokemoz
                State
+            [] guiwildchoice(Choice WildPokemoz) then
+               if Choice == true then
+                  {Send GameServer fight(Id Pokemoz WildPokemoz)}
+               else
+                  {Send GameServer runway(Id WildPokemoz)}
+               end
+               State
 	    [] invalidaction(Position Msg) then
 	       if Msg == lost then
 		  State
@@ -94,9 +101,12 @@ define
 	    end
 	    
 	 [] state(playing Direction Position Pokemoz) then
-	    case Msg of move(MoveType) then               
+	    case Msg of move(MoveType) then             
 	       {Send GameServer move(Id {Utils.calculateNewPos Position MoveType} MoveType)}
 	       state(waiting MoveType Pokemoz)
+            [] play(Position) then
+               {Send Gui play(Position)}
+               State
 	    [] wildpokemoz(WildPokemoz) then
                 {Wildpokemoz WildPokemoz Pokemoz State}
             [] guiwildchoice(Choice WildPokemoz) then
@@ -109,6 +119,7 @@ define
 	    [] playerfight(OtherPlayer) then
 	       State
 	    [] fightresult(Pokemoz Result) then
+               {Utils.printf "fight result"}
                {FightResult Pokemoz Result Direction Position}
  	    [] getpokemoz(P) then
                P = Pokemoz

@@ -68,7 +68,7 @@ define
       end
    end
 
-   MoveType = movetype(up down right left)
+   MoveType = movetype(up down right left stay)
 
    AutoFight = 2
 

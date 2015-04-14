@@ -153,6 +153,22 @@ define
 	 end
       end
 
+      % Remove a player from the player list.
+      fun {RemovePlayer Id Players NewPlayers IndexA IndexB MaxIndex}
+
+         if IndexA > MaxIndex then
+            NewPlayers
+         else
+           if Players.IndexA.id \= Id then
+                  {Utils.printf IndexB}
+               NewPlayers.IndexB = Players.IndexA  
+              {RemovePlayer Id Players NewPlayers IndexA+1 IndexB+1 MaxIndex}
+           else
+              {RemovePlayer Id Players NewPlayers IndexA+1 IndexB MaxIndex}
+	   end
+         end
+      end
+
       proc {SendMapChangedToAllPlayers Map Players}
          for I in 1..{Width Players} do
            {Send Players.I.port mapchanged(Map Players)}
@@ -172,8 +188,10 @@ define
 	       {Utils.printf "server not started please start the server"}
 	    end
 	 [] state(listening Map Players) then
-	    case Msg of round(I) then
-	       {Send Players.I.port play(Players.I.pos)}
+	    case Msg of round then
+               for I in 1..{Width Players} do
+	        {Send Players.I.port play(Players.I.pos)}
+               end
 	       State
             [] getplayers(Id P) then
                P = Players.Id.port
@@ -211,6 +229,20 @@ define
 	       {Utils.printf "fighting a pokemon"}
 	       {Send Players.Id.port {Fight PlayerPokemoz OtherPokemoz}}
 	       State
+            [] leave(Id) then
+               local W UpdatedPlayers NewP in
+                 {Utils.printf "trainer leaving lost"#Id}
+                 if ( ({Width Players}-1) > 0) then
+                    W =  ({Width Players}-1)
+                 else
+                    W = 0
+                 end 
+                 NewP = {MakeTuple players W}
+                 UpdatedPlayers = {RemovePlayer Id Players NewP  1 1 {Width Players}}
+                 {SendMapChangedToAllPlayers Map UpdatedPlayers}
+                 {Utils.printf "players udpated"}
+	         state(listening Map UpdatedPlayers)
+               end
 	    [] quit then
 	       {Utils.printf "shutting down game server"}
                state(stopped)
