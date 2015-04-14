@@ -6,6 +6,7 @@ import
    Utils
    GameServer
    Trainer
+   TrainerBot
 define
    %% Default values
    MAP = map
@@ -17,6 +18,7 @@ define
    AUTOFIGHT = 2
    Players
    PositionPlayer
+   PositionPlayer2
    RoundLoop
 
    %% Posible arguments
@@ -29,15 +31,6 @@ define
 	      autofight(single char:&a type:int default:AUTOFIGHT)
               help(single char:&h default:false)
               )}
-
-   fun {InitPlayers Game Gui Speed}
-      Players = {MakeTuple players 1}
-      PositionPlayer = pos(x:7 y:7)
-      Players.1 = player(port:{Trainer.trainer 1 Game Gui Args.autofight} pos:PositionPlayer speed:Speed)      
-      Players
-   end
-
-
    local
       Game
    in
@@ -60,16 +53,24 @@ define
       {Utils.printf "#Speed :\t"#Args.speed}
       {Utils.printf "#Probability of wild pokemon:\t"#Args.wildprobability}
       
-      local Players Map GuiObject in
+      local Players Map GuiObject TrainerBotObject in
 	 %{Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
 	 {Utils.printf "load map file"}
 	 %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
 	 Map = map( r(1 1 1 0 0 0 0) r(1 1 1 0 0 1 1) r(1 1 1 0 0 1 1) r(0 0 0 0 0 1 1) r(0 0 0 1 1 1 1) r(0 0 0 1 1 0 0) r(0 0 0 0 0 0 0))
 
 	 {Utils.printf "Init player"}
-	 Players = {InitPlayers Game GuiObject Args.speed}
+         Players = {MakeTuple players 2}
+         PositionPlayer = pos(x:7 y:7)
+         PositionPlayer2 = post(x:1 y:7)
+         Players.1 = player(port:{Trainer.trainer 1 Game GuiObject Args.autofight} id:1 pos:PositionPlayer speed:Args.speed) 
+         Players.2 = player(port:{Trainer.trainer 2 Game TrainerBotObject Args.autofight} id:2 pos:PositionPlayer2 speed:Args.speed)
+    
 	 {Utils.printf "load gui"}
 	 GuiObject = {Gui.gui Players.1.port Map}
+         {Utils.printf "load bot"}
+         TrainerBotObject = {TrainerBot.trainerBot Players.2.port Map}
+
 	 {Utils.printf "Init game"}
 	 Game = {GameServer.gameServer Map Players Args.wildprobability}
 
@@ -84,7 +85,7 @@ define
 	
         for I in 1..{Width Players} do
           thread
-            {RoundLoop I ((10 -Players.I.speed) * DELAY)}
+            {RoundLoop Players.I.id ((10 -Players.I.speed) * 200)}
 	  end
         end
 	

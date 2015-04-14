@@ -113,13 +113,25 @@ define
 	    end
 	 end
       end
+
+      fun {IsPositionFree Id Players Position Index IndexMax}
+        if Index > IndexMax then
+         true
+        elseif Players.Index.id \= Id andthen Players.Index.pos.x == Position.x andthen Players.Index.pos.y == Position.y then
+         false
+        else
+         {IsPositionFree Id Players Position Index+1 IndexMax}
+        end
+      end
  
-      fun {CheckValidPosition Position}
-	 local WidthInCell HeightInCell in
+      fun {CheckValidPosition Id Position Players}
+	 local WidthInCell HeightInCell T in
 	    WidthInCell = {Record.width Map.1}
 	    HeightInCell = {Record.width Map}
 	    if Position.x > 0 andthen Position.x =< WidthInCell andthen Position.y > 0 andthen  Position.y =< HeightInCell then
-	       true
+               % if the position is correct we still have to check if no player is already at that position
+               {IsPositionFree Id Players Position 1 {Width Players}}
+              
 	    else
 	       false
 	    end
@@ -127,18 +139,24 @@ define
       end
 
       % Update a player position in the player list.
-      fun {UpdatePlayerPosition Id Player NewPosition}
+      fun {UpdatePlayerPosition Id Players Player NewPosition}
 	 local NewPlayers in
 	    NewPlayers = {MakeTuple players {Width Players}}
 	    for I in 1..{Width Players} do
 	       if I == Id then
-		  NewPlayers.I = player(port:Player.port pos:NewPosition)   
+		  NewPlayers.I = player(port:Player.port pos:NewPosition id:Player.id speed:Player.speed)   
 	       else
 		  NewPlayers.I = Players.I
 	       end
 	    end
 	    NewPlayers
 	 end
+      end
+
+      proc {SendMapChangedToAllPlayers Map Players}
+         for I in 1..{Width Players} do
+           {Send Players.I.port mapchanged(Map Players)}
+         end
       end
 
       fun {Inbox State Msg}
@@ -168,12 +186,12 @@ define
 		     {Send Players.Id.port invalid(dead Players.Id.pos)}
 		     State
 		  % Check if the position the player want to move to is valid
-		  elseif {CheckValidPosition Position} == false then
+		  elseif {CheckValidPosition Id Position Players} == false then
 		     {Send Players.Id.port invalid(wrongmove Players.Id.pos)}
 		     State
 		  else
-		     UpdatedPlayers = {UpdatePlayerPosition Id Players.Id Position}
-		     {Send UpdatedPlayers.Id.port mapchanged(Map UpdatedPlayers)}
+		     UpdatedPlayers = {UpdatePlayerPosition Id Players Players.Id Position}
+                     {SendMapChangedToAllPlayers Map UpdatedPlayers}
 		     % if we are in a grass area check wilpokemoz, danger ! 
 		     if Obj == 1 then
 			if {IsThereWildPokemoz} == true then

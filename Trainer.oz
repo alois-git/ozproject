@@ -70,6 +70,7 @@ define
             end
 	 [] state(waiting Direction Pokemoz) then
 	    case Msg of play(Position) then
+               {Send Gui play(Position)}
 	       state(playing Direction Position Pokemoz)
 	    [] wildpokemoz(WildPokemoz) then
                {Wildpokemoz WildPokemoz Pokemoz State}
@@ -93,7 +94,7 @@ define
 	    end
 	    
 	 [] state(playing Direction Position Pokemoz) then
-	    case Msg of move(MoveType) then
+	    case Msg of move(MoveType) then               
 	       {Send GameServer move(Id {Utils.calculateNewPos Position MoveType} MoveType)}
 	       state(waiting MoveType Pokemoz)
 	    [] wildpokemoz(WildPokemoz) then

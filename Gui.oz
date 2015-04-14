@@ -202,6 +202,8 @@ define
 	       {Utils.printf "showing windows"}
 	       {ShowWindow}
 	       state(listening)
+            else
+               State
 	    end
 	
 	 [] state(listening) then
