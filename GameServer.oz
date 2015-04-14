@@ -23,10 +23,13 @@ define
 
       % Generate a random pokemoz with a min level of 5 and a random extra level depending on other pokemon
       fun {GenerateRandomPokemoz Pokemoz}
-	 local T Lvl in
-	    T = ({OS.rand} mod 3)+1
+	 local TypeIndex Type Lvl NameIndex Name in
+	    TypeIndex = ({OS.rand} mod 3)+1
             Lvl = 5 %+ ({OS.rand} mod (Pokemoz.lvl-5))
-	    pokemoz(hp:Utils.pokemozMaxHp.Lvl lvl:Lvl type:Utils.pokemozType.T maxhp:Utils.pokemozMaxHp.Lvl name:"wild pokemoz" xp:0)
+            NameIndex = ({OS.rand} mod 5) +1
+            Type = Utils.pokemozType.TypeIndex
+            Name = Utils.pokemozDatabaseName.Type.NameIndex
+	    pokemoz(hp:Utils.pokemozMaxHp.Lvl lvl:Lvl type:Type maxhp:Utils.pokemozMaxHp.Lvl name:Name#"(wild pokemoz)" xp:0)
 	 end
       end
 
@@ -158,7 +161,7 @@ define
                P = Players.Id.port
                State
 	    [] move(Id Position Direction) then
-	       local Obj UpdatedPlayers Wild in
+	       local Obj UpdatedPlayers in
 		  % Get what type of area it is at that position (grass/road/trainer)
 		  Obj = {GetAt Map Position.x Position.y}
 		  if {Label Players.Id} == dead then

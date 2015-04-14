@@ -14,15 +14,10 @@ define
    HeightText
    MapWidth
    MapHeight
-   TargetObjects
    
    CD
    Grass
    Path 
-   PlayerUp
-   PlayerDown
-   PlayerLeft
-   PlayerRight
    PokemozGrass
    PokemozFire
    PokemozWater
@@ -41,28 +36,6 @@ define
       else
 	 ~1
       end
-   end
-
-   fun {DeleteAt Map X Y}
-      NewMap
-   in
-      NewMap = {MakeTuple 'map' HeightInCell}
-      for I in 1..HeightInCell do
-	 NewMap.I = {MakeTuple 'r' WidthInCell}
-	 for J in 1..WidthInCell do
-	    if I == Y andthen J == X then
-	       NewMap.I.J = 0
-	    else
-	       NewMap.I.J = Map.I.J
-	    end
-	 end
-      end
-      NewMap
-   end
-   
-   proc {GameFinished Text}
-      {TextCanvas create(rect 0 0 MapWidth HeightCell fill:gray outline:black)}
-      {DrawText Text p(x:(3*(WidthInCell div 4)) y:1)}
    end
    
    proc {UpdatePlayerInfo Player}
@@ -153,7 +126,7 @@ define
  
    fun {AskChoiceWild OtherPokemoz}
     local Y 
-       Desc=lr(label(init: "A wild pokemoz is attacking you what do you want to do ? \n Level: "#OtherPokemoz.lvl#" HP : "#OtherPokemoz.hp#" Type : "#OtherPokemoz.type)
+       Desc=lr(label(init: OtherPokemoz.name#"is attacking you what do you want to do ? \n Level: "#OtherPokemoz.lvl#" HP : "#OtherPokemoz.hp#" Type : "#OtherPokemoz.type)
 		button(text:"Attack" 
                       return:Y
                       action:toplevel#close)

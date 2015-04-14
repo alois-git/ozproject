@@ -2,8 +2,6 @@ functor
 import
    Application
    Property
-   System
-   OS
    Gui
    Utils
    GameServer
@@ -18,9 +16,7 @@ define
    RUNAWAYPROBA = 50
    AUTOFIGHT = 2
    Players
-   Pokemoz
    PositionPlayer
-   A
    RoundLoop
 
    %% Posible arguments
@@ -81,11 +77,9 @@ define
 	 {Send Game start}
 
    	proc {RoundLoop I Delay}
-           local Player in
             {Time.delay Delay}    
 	    {Send Game round(I)}
             {RoundLoop I Delay}
-           end
    	end
 	
         for I in 1..{Width Players} do
