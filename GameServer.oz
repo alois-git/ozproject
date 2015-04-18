@@ -14,11 +14,15 @@ define
       {Wait WaitEnd}
    end
 
-   fun {GameServer Map Players WILDPOKEMOZPROBA}
+   fun {GameServer Map Players WILDPOKEMOZPROBA RUNAWAYCHANCES}
 
       % function to see if there is a wild pokemoz in the grass
       fun {IsThereWildPokemoz}
 	 ({OS.rand} mod 100) < WILDPOKEMOZPROBA 
+      end
+ 
+      fun {IsRunAwaySuccessfull}
+ 	({OS.rand} mod 100) < RUNAWAYCHANCES 
       end
 
       % Generate a random pokemoz with a min level of 5 and a random extra level depending on other pokemon
@@ -224,7 +228,15 @@ define
 		  end
 	       end
 	    [] runway(Id WildPokemoz) then
-	       {Utils.printf "Run away from a wild pokemon CHICKEN :D"}
+               	  {Utils.printf "trying to run away from a wild pokemon"}
+               if {IsRunAwaySuccessfull} == false then
+                  {Utils.printf "run away failed"}
+                  local P in
+                    {Send Players.Id.port getpokemoz(P)}
+		    {Send Players.Id.port {Fight P WildPokemoz}}
+                  end
+               end
+
 	       State
 	    [] fight(Id PlayerPokemoz OtherPokemoz) then
 	       {Utils.printf "fighting a pokemon"}

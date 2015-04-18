@@ -16,11 +16,7 @@ define
    DELAY = 200
    RUNAWAYPROBA = 50
    AUTOFIGHT = 2
-   Players
-   PositionPlayer
-   PositionPlayer2
-   RoundLoop
-
+   
    %% Posible arguments
    Args = {Application.getArgs
            record(
@@ -28,11 +24,17 @@ define
               pokemoz(single char:&p type:int default:NBPOKEMOZ)
               speed(single char:&s type:int default:DEFAULTSPEED)
 	      wildprobability(single char:&p type:int default:WILDPOKEMOZPROBA)
+              runawayproba(single char:&r type:int default:RUNAWAYPROBA)
+	      delay(single char:&d type:int default:DELAY)
 	      autofight(single char:&a type:int default:AUTOFIGHT)
               help(single char:&h default:false)
               )}
    local
       Game
+      Players
+      PositionPlayer
+      PositionPlayer2
+      RoundLoop
    in
    %% Show help
       if Args.help then
@@ -41,7 +43,8 @@ define
 	 {Utils.printf "  -m, --map FILE\tFile containing the map (default "#MAP#")"}
 	 {Utils.printf "  -p, --pokemoz \t Number of pokemon you can have"}
 	 {Utils.printf "  -s, --speed \t Speed of the trainer [0,10]"}
-	 {Utils.printf "  -p, --probability \t Probability of wild pokemon in grass"}
+	 {Utils.printf "  -w, --wildprobability \t Probability of wild pokemon in grass"}
+	 {Utils.printf "  -r, --runwayprobability \t Probability of run away from a wild pokemon in grass"}
 	 {Utils.printf "  -a, --autofight \t 0 always run away / 1 always fight / 2 ask"}
 	 {Utils.printf "  -h, --help \t This help"}
 	 {Utils.printf "Example :"}
@@ -72,7 +75,7 @@ define
          TrainerBotObject = {TrainerBot.trainerBot Players.2.port Map}
 
 	 {Utils.printf "Init game"}
-	 Game = {GameServer.gameServer Map Players Args.wildprobability}
+	 Game = {GameServer.gameServer Map Players Args.wildprobability Args.runawayproba}
 
 	 {Utils.printf "Start game"}
 	 {Send Game start}
@@ -84,7 +87,7 @@ define
    	end
 	
           thread
-            {RoundLoop ((10 - Args.speed) * 200)}
+            {RoundLoop ((10 - Args.speed) * Args.delay)}
 	  end
 	
 
