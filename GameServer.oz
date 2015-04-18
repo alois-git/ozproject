@@ -81,11 +81,7 @@ define
 	       {Fight NewPok1 NewPok2}
 	    end
 	 else
-	    if Pokemoz1.hp > 0 then
-	       fightresult({GainXP Pokemoz1 Pokemoz2.lvl} win)
-	    else
-	       fightresult(Pokemoz1 lost)
-	    end
+            fight(playerpokemoz:Pokemoz1 otherpokemoz:Pokemoz2)
 	 end
       end
 
@@ -127,6 +123,61 @@ define
          {IsPositionFree Id Players Position Index+1 IndexMax}
         end
       end
+
+      fun {GetPlayerAtPosition Position Players}
+        {GetPlayerAtPositionRec Position Players 1 {Width Players}}
+      end
+
+      fun {GetPlayerAtPositionRec Position Players Index IndexMax}
+        if Index > IndexMax then
+         none
+        elseif Players.Index.pos.x == Position.x andthen Players.Index.pos.y == Position.y then
+         Players.Index
+        else
+         {GetPlayerAtPositionRec Position Players Index+1 IndexMax}
+        end
+      end
+
+      fun {GetTrainerAround Position Players}
+          local Up Down Right Left in
+           Up =  {GetPlayerAtPosition {Utils.calculateNewPos Position up} Players}
+           Down = {GetPlayerAtPosition {Utils.calculateNewPos Position down} Players}
+           Left = {GetPlayerAtPosition {Utils.calculateNewPos Position left} Players}
+           Right  = {GetPlayerAtPosition {Utils.calculateNewPos Position right} Players}
+           [Up Down Left Right]
+          end
+      end
+  
+      proc {FightWithTrainers Player Trainers}
+         {FightWithTrainersRec Player Trainers}
+      end
+
+      proc {FightWithTrainersRec Player Trainers}
+         case Trainers of nil then
+
+              skip
+         [] H|T then
+            if H \= none then
+              local P1 P2 Result FinalResultTrainer FinalResultPlayer in
+                {Send Player.port getpokemoz(P1)}
+                {Send H.port getpokemoz(P2)}
+	        Result = {Fight P1 P2}
+                % depending on the result send message to player and other trainer
+                if Result.playerpokemoz.hp > 0 then
+	           FinalResultPlayer = fightresult({GainXP Result.playerpokemoz Result.otherpokemoz.lvl} win)
+                   FinalResultTrainer = fightresult(Result.otherpokemoz lost)
+	        else
+	           FinalResultPlayer = fightresult(Result.playerpokemoz lost)
+                   FinalResultTrainer = fightresult({GainXP Result.otherpokemoz Result.playerpokemoz.lvl} win)
+	        end
+	        
+                {Send Player.port FinalResultPlayer}
+                {Send H.port FinalResultTrainer}
+              end
+            end
+            {FightWithTrainersRec Player T}
+         end
+      end
  
       fun {CheckValidPosition Id Position Players}
 	 local WidthInCell HeightInCell T in
@@ -135,7 +186,6 @@ define
 	    if Position.x > 0 andthen Position.x =< WidthInCell andthen Position.y > 0 andthen  Position.y =< HeightInCell then
                % if the position is correct we still have to check if no player is already at that position
                {IsPositionFree Id Players Position 1 {Width Players}}
-              
 	    else
 	       false
 	    end
@@ -164,7 +214,6 @@ define
             NewPlayers
          else
            if Players.IndexA.id \= Id then
-                  {Utils.printf IndexB}
                NewPlayers.IndexB = Players.IndexA  
               {RemovePlayer Id Players NewPlayers IndexA+1 IndexB+1 MaxIndex}
            else
@@ -236,6 +285,8 @@ define
 			   end
 			end
 		     end
+                     % check if any trainer is around and if yes start a fight
+                     {FightWithTrainers CurrentPlayer {GetTrainerAround Position UpdatedPlayers}}
 		     state(listening Map UpdatedPlayers)
 		  end
 	       end
@@ -251,9 +302,17 @@ define
                end
 	       State
 	    [] fight(Id PlayerPokemoz OtherPokemoz) then
-	       {Utils.printf "fighting a pokemon"}
-	       {Send {GetPlayerById Id Players}.port {Fight PlayerPokemoz OtherPokemoz}}
-	       State
+	       {Utils.printf "fighting a wild pokemon"}
+               local Result FinalResult in 
+                 Result = {Fight PlayerPokemoz OtherPokemoz}
+                 if Result.playerpokemoz.hp > 0 then
+	           FinalResult = fightresult({GainXP Result.playerpokemoz Result.otherpokemoz.lvl} win)
+	         else
+	           FinalResult = fightresult(Result.playerpokemoz lost)
+	         end
+	         {Send {GetPlayerById Id Players}.port FinalResult}
+	         State
+               end
             [] leave(Id) then
                local W UpdatedPlayers NewP in
                  {Utils.printf "trainer leaving lost"#Id}
@@ -265,7 +324,6 @@ define
                  NewP = {MakeTuple players W}
                  UpdatedPlayers = {RemovePlayer Id Players NewP  1 1 {Width Players}}
                  {SendMapChangedToAllPlayers Map UpdatedPlayers}
-                 {Utils.printf "players udpated"#{Width UpdatedPlayers}}
 	         state(listening Map UpdatedPlayers)
                end
 	    [] quit then

@@ -253,6 +253,7 @@ define
 	       {UpdatePlayerPokemozInfo Pokemoz Result}
 	       State
 	    [] lost(Pokemoz) then
+               {Utils.printf "lost !!!!! dialog must appear"}
                {UpdatePlayerPokemozInfo Pokemoz lost}
                if {Lost} == true then
                  {CloseWindow}

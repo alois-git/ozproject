@@ -29,8 +29,10 @@ define
                      state(playing Direction Position Pokemoz)
                   end
                else
-                  {Send Gui lost(Pokemoz)}
-                  state(lost) 
+                    {Utils.printf "lost sending signal"}
+                  {Send Gui lost(Pokemoz)}               
+                  {Send GameServer leave(Id)}
+                  state(lost Pokemoz) 
         end
      end
 
@@ -70,12 +72,12 @@ define
             else
               State
             end
-         [] state(lost) then
-            case Msg of quit then
-               {Send GameServer leave(Id)}
+         [] state(lost Pokemoz) then
+            case Msg of getpokemoz(P) then
+               P = Pokemoz
                State
             else
-	       State
+              State
             end
 	 [] state(waiting Direction Pokemoz) then
 	    case Msg of play(Position) then
@@ -86,7 +88,6 @@ define
 	    [] playerfight(OtherPlayer) then
 	       State
 	    [] fightresult(Pokemoz Result) then
-               {Utils.printf "getting fight result"}
                {FightResult Pokemoz Result Direction none}
 	    [] mapchanged(Map Players) then
 	       {MapChanged Map Players State}
@@ -132,7 +133,6 @@ define
 	    [] playerfight(OtherPlayer) then
 	       State
 	    [] fightresult(Pokemoz Result) then
-                       {Utils.printf "getting fight result"#Result}
                {FightResult Pokemoz Result Direction Position}
  	    [] getpokemoz(P) then
                P = Pokemoz
