@@ -55,12 +55,22 @@ define
       fun {Inbox State Msg}
 	 case State of state(pokemozpick Direction) then
 	    case Msg of pickpokemoz then
-	    {Utils.printf "picking pokemoz"}
-	    {Send Gui start}
-	    local Pokemoz in 
-	       Pokemoz = pokemoz(type:grass maxhp:20 hp:20 lvl:5 name:"mypokemoz" xp:0)
-	       state(waiting Direction Pokemoz)
-	    end end
+	      {Utils.printf "picking pokemoz"}
+	      {Send Gui start}
+	      state(guistarted Direction)
+             end
+         [] state(guistarted Direction) then
+            case Msg of mapchanged(Map Players) then
+	       {MapChanged Map Players State}
+	    [] pokemonchoosen(Type) then
+   	      local Pokemoz in 
+	        Pokemoz = pokemoz(type:Type maxhp:20 hp:20 lvl:5 name:"Player Pokemoz" xp:0)
+                {Utils.printf "pokemon type choosen"}
+	        state(waiting Direction Pokemoz)
+	      end 
+            else
+              State
+            end
          [] state(lost) then
             case Msg of quit then
                {Send GameServer leave(Id)}

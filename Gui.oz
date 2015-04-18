@@ -59,7 +59,7 @@ define
       {DrawText "XP:\t"#P.xp p(x:4 y:4)}
       {DrawText "Level:\t"#P.lvl p(x:4 y:5)}
       {DrawText "Type:\t"#P.type p(x:4 y:6)}
-      {DrawImageTextCanvas PokemozGrass p(x:1 y:2)}
+      %{DrawImageTextCanvas PokemozGrass p(x:1 y:2)}
    end
    
    
@@ -163,6 +163,24 @@ define
     end  
    end
 
+  fun {PickPokemon}
+    local G W F
+       Desc=lr(label(init: "Pick the type of your pokemon")
+		button(text:"Grass"
+                      return:G
+                      action:toplevel#close)
+		button(text:"Water"
+                      return:W
+                      action:toplevel#close)
+		button(text:"Fire"
+                      return:F
+                      action:toplevel#close))
+    in 
+       {{QTk.build Desc} show}
+       if G then grass elseif W then water else fire end 
+    end  
+   end
+
    proc {ShowWindow}
       {Window show}
    end
@@ -214,6 +232,7 @@ define
 	       {LoadMapWindow InitialMap}
 	       {Utils.printf "showing windows"}
 	       {ShowWindow}
+               {Send Trainer pokemonchoosen({PickPokemon})}
 	       state(listening)
             else
                State
