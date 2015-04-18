@@ -10,11 +10,11 @@ import
 define
    %% Default values
    MAP = map
-   WILDPOKEMOZPROBA = 30
+   WILDPOKEMOZPROBA = 100
    NBPOKEMOZ = 1
    DEFAULTSPEED = 9
    DELAY = 200
-   RUNAWAYPROBA = 50
+   RUNAWAYPROBA = 0
    AUTOFIGHT = 2
    
    %% Posible arguments

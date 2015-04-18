@@ -29,10 +29,9 @@ define
                      state(playing Direction Position Pokemoz)
                   end
                else
-                  {Send Gui pokemozchanged(Pokemoz Result)}
-                  {Send Gui lost}
+                  {Send Gui lost(Pokemoz)}
                   state(lost) 
-               end
+        end
      end
 
 
@@ -87,6 +86,7 @@ define
 	    [] playerfight(OtherPlayer) then
 	       State
 	    [] fightresult(Pokemoz Result) then
+               {Utils.printf "getting fight result"}
                {FightResult Pokemoz Result Direction none}
 	    [] mapchanged(Map Players) then
 	       {MapChanged Map Players State}
@@ -132,6 +132,7 @@ define
 	    [] playerfight(OtherPlayer) then
 	       State
 	    [] fightresult(Pokemoz Result) then
+                       {Utils.printf "getting fight result"#Result}
                {FightResult Pokemoz Result Direction Position}
  	    [] getpokemoz(P) then
                P = Pokemoz

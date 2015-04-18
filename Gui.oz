@@ -249,11 +249,14 @@ define
 	       State
 	    [] pokemozchanged(Pokemoz Result) then
                % if lvlup Pokemon gained a boost 346 EXP. Points !
+               {Utils.printf "pokemoz changed"}
 	       {UpdatePlayerPokemozInfo Pokemoz Result}
 	       State
-	    [] lost then
+	    [] lost(Pokemoz) then
+               {UpdatePlayerPokemozInfo Pokemoz lost}
                if {Lost} == true then
                  {CloseWindow}
+                 {Utils.printf "close windows"}
 	         {Send Trainer quit}
                end
 	       State

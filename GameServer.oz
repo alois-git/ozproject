@@ -94,7 +94,7 @@ define
           CurrentXP = Pokemoz.xp + XP
           IndexLvl = Pokemoz.lvl-4
           NeededXPToLvlUp = Utils.pokemozXPNeeded.IndexLvl
-          if CurrentXP > NeededXPToLvlUp then
+          if Pokemoz.lvl < 10 andthen CurrentXP > NeededXPToLvlUp then
             NewXP = CurrentXP - NeededXPToLvlUp
             NewLvl = Pokemoz.lvl+1
             NewMaxHp = Utils.pokemozMaxHp.(NewLvl-4)
@@ -173,6 +173,20 @@ define
          end
       end
 
+      fun {GetPlayerByIdRec Id Players CurrentIndex MaxIndex}
+         if CurrentIndex > MaxIndex then
+            none
+         elseif Players.CurrentIndex.id == Id then
+            Players.CurrentIndex
+         else
+            {GetPlayerByIdRec Id Players CurrentIndex+1 MaxIndex}
+         end
+      end
+
+      fun {GetPlayerById Id Players}
+         {GetPlayerByIdRec Id Players 1 {Width Players}}
+      end
+
       %notify all players that something has changed on the map
       proc {SendMapChangedToAllPlayers Map Players}
          for I in 1..{Width Players} do
@@ -199,28 +213,26 @@ define
                end
 	       State
             [] getplayers(Id P) then
-               P = Players.Id.port
+               P = {GetPlayerById Id Players}.port
                State
 	    [] move(Id Position Direction) then
-	       local Obj UpdatedPlayers in
+	       local Obj UpdatedPlayers CurrentPlayer in
 		  % Get what type of area it is at that position (grass/road/trainer)
 		  Obj = {GetAt Map Position.x Position.y}
-		  if {Label Players.Id} == dead then
-		     {Send Players.Id.port invalid(dead Players.Id.pos)}
-		     State
 		  % Check if the position the player want to move to is valid
-		  elseif {CheckValidPosition Id Position Players} == false then
-		     {Send Players.Id.port invalid(wrongmove Players.Id.pos)}
+                  CurrentPlayer = {GetPlayerById Id Players}
+		  if {CheckValidPosition Id Position Players} == false then
+		     {Send CurrentPlayer.port invalid(wrongmove CurrentPlayer.pos)}
 		     State
 		  else
-		     UpdatedPlayers = {UpdatePlayerPosition Id Players Players.Id Position Direction}
+		     UpdatedPlayers = {UpdatePlayerPosition Id Players CurrentPlayer Position Direction}
                      {SendMapChangedToAllPlayers Map UpdatedPlayers}
 		     % if we are in a grass area check wilpokemoz, danger ! 
 		     if Obj == 1 then
 			if {IsThereWildPokemoz} == true then
 			   local P in
-                           {Send Players.Id.port getpokemoz(P)}
-			   {Send Players.Id.port wildpokemoz({GenerateRandomPokemoz P})}
+                           {Send CurrentPlayer.port getpokemoz(P)}
+			   {Send CurrentPlayer.port wildpokemoz({GenerateRandomPokemoz P})}
 			   end
 			end
 		     end
@@ -228,19 +240,19 @@ define
 		  end
 	       end
 	    [] runway(Id WildPokemoz) then
-               	  {Utils.printf "trying to run away from a wild pokemon"}
+               {Utils.printf "trying to run away from a wild pokemon"}
                if {IsRunAwaySuccessfull} == false then
                   {Utils.printf "run away failed"}
                   local P in
-                    {Send Players.Id.port getpokemoz(P)}
-		    {Send Players.Id.port {Fight P WildPokemoz}}
+                    {Send {GetPlayerById Id Players}.port getpokemoz(P)}
+                    {Utils.printf "send player combat result"}
+		    {Send {GetPlayerById Id Players}.port {Fight P WildPokemoz}}
                   end
                end
-
 	       State
 	    [] fight(Id PlayerPokemoz OtherPokemoz) then
 	       {Utils.printf "fighting a pokemon"}
-	       {Send Players.Id.port {Fight PlayerPokemoz OtherPokemoz}}
+	       {Send {GetPlayerById Id Players}.port {Fight PlayerPokemoz OtherPokemoz}}
 	       State
             [] leave(Id) then
                local W UpdatedPlayers NewP in
