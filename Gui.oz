@@ -22,6 +22,10 @@ define
    PokemozFire
    PokemozWater
    Trainer
+   TrainerUp
+   TrainerDown
+   TrainerLeft
+   TrainerRight
    MapTextures
    PokemozTextures
 
@@ -41,24 +45,21 @@ define
    proc {UpdatePlayerInfo Player}
       local P in
 	 {Send Player.port getpokemoz(P)}
-	 {TextCanvas create(rect 0 0 MapWidth HeightCell*2 fill:gray outline:gray)}
-	 {DrawText "Name:\t"#P.name p(x:2 y:1)}
-	 {DrawText "Pokemon:\t"#P.name p(x:2 y:2)}
-	 {DrawText "HP:\t"#P.hp p(x:3 y:3)}
-         {DrawText "XP:\t"#P.xp p(x:3 y:4)}
-	 {DrawText "Level:\t"#P.lvl p(x:3 y:5)}
-	 {DrawImageTextCanvas PokemozGrass p(x:5 y:2)}
+	 {UpdatePlayerPokemozInfo P none}
       end
    end
 
-   proc {UpdatePlayerPokemozInfo P}
+   proc {UpdatePlayerPokemozInfo P R}
+      %if R == win then
+         % if lvlup Pokemon gained a boost 346 EXP. Points !
+      %end
       {TextCanvas create(rect 0 0 MapWidth HeightCell*2 fill:gray outline:gray)}
-      {DrawText "Name:\t"#P.name p(x:2 y:1)}
-      {DrawText "Pokemon:\t"#P.name p(x:2 y:2)}
-      {DrawText "HP:\t"#P.hp p(x:3 y:3)}
-      {DrawText "XP:\t"#P.xp p(x:3 y:4)}
-      {DrawText "Level:\t"#P.lvl p(x:3 y:5)}
-      {DrawImageTextCanvas PokemozGrass p(x:5 y:2)}
+      {DrawText "Pokemon:\t"#P.name p(x:4 y:2)}
+      {DrawText "HP:\t"#P.hp p(x:4 y:3)}
+      {DrawText "XP:\t"#P.xp p(x:4 y:4)}
+      {DrawText "Level:\t"#P.lvl p(x:4 y:5)}
+      {DrawText "Type:\t"#P.type p(x:4 y:6)}
+      {DrawImageTextCanvas PokemozGrass p(x:1 y:2)}
    end
    
    
@@ -85,7 +86,15 @@ define
    proc {DrawPlayer Player Direction}
       PlayerIcon
    in
-	PlayerIcon = Trainer
+        case Direction of up then
+	     PlayerIcon = TrainerUp
+        [] down then
+             PlayerIcon = TrainerDown
+        [] right then
+             PlayerIcon = TrainerRight
+        else
+            PlayerIcon = TrainerLeft
+        end
       {Grid create(image WidthCell*Player.pos.x-(WidthCell div 2) HeightCell*Player.pos.y-(HeightCell div 2) image:PlayerIcon)}
    end
 
@@ -101,7 +110,7 @@ define
    proc {UpdatePlayers Players}
        % draw the players
       for I in 1..{Width Players} do
-	 {DrawPlayer Players.I up}
+	 {DrawPlayer Players.I Players.I.direction}
       end
    end
 
@@ -117,6 +126,10 @@ define
       PokemozGrass = {QTk.newImage photo(file:CD#'/images/pGrass.gif')}
       PokemozFire =  {QTk.newImage photo(file:CD#'/images/pFire.gif')}
       PokemozWater =  {QTk.newImage photo(file:CD#'/images/pWater.gif')}
+      TrainerUp = {QTk.newImage photo(file:CD#'/images/trainerUp.gif')}   
+      TrainerDown = {QTk.newImage photo(file:CD#'/images/trainerDown.gif')}   
+      TrainerLeft = {QTk.newImage photo(file:CD#'/images/trainerLeft.gif')}   
+      TrainerRight = {QTk.newImage photo(file:CD#'/images/trainerRight.gif')}   
 
       % Path = 0 and Grass = 1 but need to add one because start at 1
       MapTextures = maptextures(Path Grass)
@@ -140,7 +153,7 @@ define
 
   fun {Lost}
     local Y 
-       Desc=lr(label(init: "Your pokemoz got  killed, you have lost ! sad :( ")
+       Desc=lr(label(init: "Your pokemoz got killed, you have lost ! sad :( ")
 		button(text:"Leave"
                       return:Y
                       action:toplevel#close))
@@ -215,8 +228,9 @@ define
             [] choicewild(OtherPokemoz) then
 	       {Send Trainer guiwildchoice({AskChoiceWild OtherPokemoz} OtherPokemoz)}
 	       State
-	    [] pokemozchanged(Pokemoz) then
-	       {UpdatePlayerPokemozInfo Pokemoz}
+	    [] pokemozchanged(Pokemoz Result) then
+               % if lvlup Pokemon gained a boost 346 EXP. Points !
+	       {UpdatePlayerPokemozInfo Pokemoz Result}
 	       State
 	    [] lost then
                if {Lost} == true then

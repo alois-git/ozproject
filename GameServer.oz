@@ -139,12 +139,12 @@ define
       end
 
       % Update a player position in the player list.
-      fun {UpdatePlayerPosition Id Players Player NewPosition}
+      fun {UpdatePlayerPosition Id Players Player NewPosition Direction}
 	 local NewPlayers in
 	    NewPlayers = {MakeTuple players {Width Players}}
 	    for I in 1..{Width Players} do
 	       if I == Id then
-		  NewPlayers.I = player(port:Player.port pos:NewPosition id:Player.id speed:Player.speed)   
+		  NewPlayers.I = player(port:Player.port pos:NewPosition id:Player.id speed:Player.speed direction:Direction)   
 	       else
 		  NewPlayers.I = Players.I
 	       end
@@ -169,6 +169,7 @@ define
          end
       end
 
+      %notify all players that something has changed on the map
       proc {SendMapChangedToAllPlayers Map Players}
          for I in 1..{Width Players} do
            {Send Players.I.port mapchanged(Map Players)}
@@ -208,7 +209,7 @@ define
 		     {Send Players.Id.port invalid(wrongmove Players.Id.pos)}
 		     State
 		  else
-		     UpdatedPlayers = {UpdatePlayerPosition Id Players Players.Id Position}
+		     UpdatedPlayers = {UpdatePlayerPosition Id Players Players.Id Position Direction}
                      {SendMapChangedToAllPlayers Map UpdatedPlayers}
 		     % if we are in a grass area check wilpokemoz, danger ! 
 		     if Obj == 1 then
@@ -240,7 +241,7 @@ define
                  NewP = {MakeTuple players W}
                  UpdatedPlayers = {RemovePlayer Id Players NewP  1 1 {Width Players}}
                  {SendMapChangedToAllPlayers Map UpdatedPlayers}
-                 {Utils.printf "players udpated"}
+                 {Utils.printf "players udpated"#{Width UpdatedPlayers}}
 	         state(listening Map UpdatedPlayers)
                end
 	    [] quit then

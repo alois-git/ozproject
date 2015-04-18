@@ -63,8 +63,8 @@ define
          Players = {MakeTuple players 2}
          PositionPlayer = pos(x:7 y:7)
          PositionPlayer2 = post(x:1 y:7)
-         Players.1 = player(port:{Trainer.trainer 1 Game GuiObject Args.autofight} id:1 pos:PositionPlayer speed:Args.speed) 
-         Players.2 = player(port:{Trainer.trainer 2 Game TrainerBotObject Args.autofight} id:2 pos:PositionPlayer2 speed:Args.speed)
+         Players.1 = player(port:{Trainer.trainer 1 Game GuiObject Args.autofight} id:1 pos:PositionPlayer speed:Args.speed direction:left) 
+         Players.2 = player(port:{Trainer.trainer 2 Game TrainerBotObject Args.autofight} id:2 pos:PositionPlayer2 speed:Args.speed direction:right)
     
 	 {Utils.printf "load gui"}
 	 GuiObject = {Gui.gui Players.1.port Map}
