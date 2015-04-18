@@ -13,6 +13,7 @@ Ce qui doit encore être fait :
 - Pouvoir gagner la partie
 - Bien gérer les paramètres en entrée (hardcodé à moitier pour l'instant)
 - Intelligence des trainerBot pour l'instant purement aléatoire (si on a le temps )
+- Musique
 
 Ce qui est fait :
 
