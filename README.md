@@ -7,6 +7,28 @@ gameserver <----> trainer <-----> Gui / TrainerBot
 
 Le Gui c'est pour le joueur principale et le trainerBot c'est pour les trainer en plus sur la map.
 
+-------------------------------------------------
+22/04
+TODOs :
+1)
+	TrainerMan (joueur / GUI)
+	TrainerAuto (joueur / auto)
+	TrainerNPC (pnj)
+	--> Toutes des instances de port object Trainer
+2)
+	Pokémoz en port object
+	Pokémoz list
+3)
+	Combat (conditions de délenchement)
+	--> Paramètres de TrainerNPC
+4)
+	Map chargée depuis file
+5)
+	Combat log
+
+
+-------------------------------------------------
+
 Ce qui doit encore être fait :
 
 - Les combats entre trainer
