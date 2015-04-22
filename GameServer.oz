@@ -18,19 +18,19 @@ define
 
       % function to see if there is a wild pokemoz in the grass
       fun {IsThereWildPokemoz}
-	 ({OS.rand} mod 100) < WILDPOKEMOZPROBA 
+         ({Abs {OS.rand}} mod 100) < WILDPOKEMOZPROBA 
       end
  
       fun {IsRunAwaySuccessfull}
- 	({OS.rand} mod 100) < RUNAWAYCHANCES 
+         ({Abs {OS.rand}} mod 100) < RUNAWAYCHANCES 
       end
 
       % Generate a random pokemoz with a min level of 5 and a random extra level depending on other pokemon
       fun {GenerateRandomPokemoz Pokemoz}
 	 local TypeIndex Type Lvl NameIndex Name in
-	    TypeIndex = ({OS.rand} mod 3)+1
-            Lvl = 5 %+ ({OS.rand} mod (Pokemoz.lvl-5))
-            NameIndex = ({OS.rand} mod 5) +1
+	    TypeIndex = ({Abs {OS.rand}} mod 3) + 1
+            Lvl = 5 %% + ({Abs {OS.rand}} mod (Pokemoz.lvl-5))
+            NameIndex = ({Abs {OS.rand}} mod 5) + 1
             Type = Utils.pokemozType.TypeIndex
             Name = Utils.pokemozDatabaseName.Type.NameIndex
 	    pokemoz(hp:Utils.pokemozMaxHp.Lvl lvl:Lvl type:Type maxhp:Utils.pokemozMaxHp.Lvl name:Name#"(wild pokemoz)" xp:0)
@@ -40,7 +40,7 @@ define
       fun {GetDamages Pokemoz1 Pokemoz2}
 	 local Proba R in 
 	    Proba = (( 6 + Pokemoz1.lvl - Pokemoz2.lvl) * 9)
-	    R = {OS.rand}  mod 101
+	    R = {Abs {OS.rand}}  mod 101
 	    if R > Proba then
 	       %{Utils.printf Pokemoz1.name#" attack failed"}
 	       0

@@ -40,7 +40,7 @@ define
             TA TD LA LD in
             {Send Pkmz get(lx ret(LA))}
             {Send S.progress get(lx ret(LD))}
-            if {Utils.abs {OS.rand}} mod 100 < {SuccessProba LA LD} then
+            if {Abs {OS.rand}} mod 100 < {SuccessProba LA LD} then
                {Send Pkmz get(type ret(TA))}
                TD = S.type
                {Send S.progress removehp(TPDMGTABLE.TA.TD)}
@@ -78,9 +78,9 @@ define
                   )
       T N L
    in
-      T = {Utils.abs {OS.rand}} mod 3 + 1
-      N = {Utils.abs {OS.rand}} mod PkmzName.namecount
-      L = {Utils.abs {OS.rand}} mod (MAXIMUMLVL - MINIMUMLVL) + MINIMUMLVL
+      T = {Abs {OS.rand}} mod 3 + 1
+      N = {Abs {OS.rand}} mod PkmzName.namecount
+      L = {Abs {OS.rand}} mod (MAXIMUMLVL - MINIMUMLVL) + MINIMUMLVL
       {NewPokemoz PkmzType.T PkmzName.(PkmzType.T).N L}
    end
    

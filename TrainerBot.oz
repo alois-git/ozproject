@@ -23,7 +23,7 @@ fun {TrainerBot Trainer InitialMap}
 	       State
             [] play(Position) then
      	       local R in 
-                  R = ({OS.rand} mod 100) +1
+                  R = {Abs {OS.rand}} mod 100 + 1
                   if R < 4 then
         	     {Send Trainer move(Utils.moveType.R)}
                   end
