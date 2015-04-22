@@ -31,7 +31,6 @@ define
               )}
    local
       Game
-      Players
       PositionPlayer
       PositionPlayer2
       RoundLoop

@@ -1,7 +1,7 @@
 functor
 import
    QTk at 'x-oz://system/wp/QTk.ozf'
-   System
+%  System
    OS
    Utils
 export
@@ -71,9 +71,9 @@ define
       end
    end
 
-   proc {DrawImageTextCanvas Image Position}
-      {TextCanvas create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:Image)}
-   end
+%   proc {DrawImageTextCanvas Image Position}
+%      {TextCanvas create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:Image)}
+%   end
    
    proc {DrawImage Image Position}
       {Grid create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:Image)}
@@ -177,7 +177,7 @@ define
                       action:toplevel#close))
     in 
        {{QTk.build Desc} show}
-       if G then grass elseif W then water else fire end 
+       if G then grass elseif W then water elseif F then fire end 
     end  
    end
 

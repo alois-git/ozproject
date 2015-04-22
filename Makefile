@@ -8,35 +8,38 @@
 SOURCES=PokemozMain.oz
 OBJECTS=$(SOURCES:.oz=.ozf)
 #EXECUTABLE=
+OZC= ozc -c
 
 #all: $(OBJECTS)
+
+main: PokemozMain.ozf
 
 run: PokemozMain.ozf
 	ozengine PokemozMain.ozf -m map.txt
 
 .oz.ozf:
-	ozc -c $< -o $@
+	$(OZC) $< -o $@
 
 GameServer.ozf: GameServer.oz 
-	ozc -c GameServer.oz
+	$(OZC) GameServer.oz
 
 Pokemoz.ozf: Pokemoz.oz Utils.ozf
-	ozc -c Pokemoz.oz
+	$(OZC) Pokemoz.oz
 
 Trainer.ozf: Trainer.oz Utils.ozf
-	ozc -c Trainer.oz
+	$(OZC) Trainer.oz
 
 Utils.ozf: Utils.oz
-	ozc -c Utils.oz
+	$(OZC) Utils.oz
 
 Gui.ozf: Gui.oz Utils.ozf
-	ozc -c Gui.oz
+	$(OZC) Gui.oz
 
 TrainerBot.ozf: TrainerBot.oz Utils.ozf
-	ozc -c TrainerBot.oz
+	$(OZC) TrainerBot.oz
 
 PokemozMain.ozf: PokemozMain.oz Gui.ozf Utils.ozf GameServer.ozf Trainer.ozf TrainerBot.ozf Pokemoz.ozf
-	ozc -c PokemozMain.oz
+	$(OZC) PokemozMain.oz
 
 clean:
 	rm -f *.ozf

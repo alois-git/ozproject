@@ -6,7 +6,7 @@ export
    GameServer
    WaitEndGame
 define
-   DELAY = 200
+%  DELAY = 200
    WaitEnd
    WaitEndGame
 
@@ -180,7 +180,7 @@ define
       end
  
       fun {CheckValidPosition Id Position Players}
-	 local WidthInCell HeightInCell T in
+	 local WidthInCell HeightInCell in
 	    WidthInCell = {Record.width Map.1}
 	    HeightInCell = {Record.width Map}
 	    if Position.x > 0 andthen Position.x =< WidthInCell andthen Position.y > 0 andthen  Position.y =< HeightInCell then

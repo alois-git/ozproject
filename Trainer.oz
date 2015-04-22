@@ -1,24 +1,24 @@
 functor
 import
-   Gui
+%   Gui
    Utils
-   GameServer
+%   GameServer
 export
    Trainer
 define
    fun {Trainer Id GameServer Gui AUTOFIGHT}
       
-      fun {FightTrainer PlayerPokemoz OtherPlayerPokemoz}
-	 true
-      end
-
-      fun {FightPokemoz PlayerPokemoz OtherPokemoz}
-	 true
-      end
-
-      fun {ShouldFight Poke OtherPoke}
-	 true
-      end
+%      fun {FightTrainer PlayerPokemoz OtherPlayerPokemoz}
+%	 true
+%      end
+%
+%      fun {FightPokemoz PlayerPokemoz OtherPokemoz}
+%	 true
+%      end
+%
+%      fun {ShouldFight Poke OtherPoke}
+%	 true
+%      end
 
       fun {FightResult Pokemoz Result Direction Position}
    	if Result == win then
@@ -85,7 +85,7 @@ define
 	       state(playing Direction Position Pokemoz)
 	    [] wildpokemoz(WildPokemoz) then
                {Wildpokemoz WildPokemoz Pokemoz State}
-	    [] playerfight(OtherPlayer) then
+	    [] playerfight(_) then
 	       State
 	    [] fightresult(Pokemoz Result) then
                {FightResult Pokemoz Result Direction none}
@@ -130,7 +130,7 @@ define
                   {Send GameServer runway(Id WildPokemoz)}
                end
                State
-	    [] playerfight(OtherPlayer) then
+	    [] playerfight(_) then
 	       State
 	    [] fightresult(Pokemoz Result) then
                {FightResult Pokemoz Result Direction Position}

@@ -19,9 +19,9 @@ fun {TrainerBot Trainer InitialMap}
 	    end
 	
 	 [] state(playing) then
-	    case Msg of mapchanged(Map Players) then
+	    case Msg of mapchanged(_ _) then
 	       State
-            [] play(Position) then
+            [] play(_) then
      	       local R in 
                   R = {Abs {OS.rand}} mod 100 + 1
                   if R < 4 then
@@ -33,7 +33,7 @@ fun {TrainerBot Trainer InitialMap}
 	       {Utils.printf "Bot calculate if should fight"}
                {Send Trainer guiwildchoice(true OtherPokemoz)}
 	       State
-	    [] pokemozchanged(Pokemoz) then
+	    [] pokemozchanged(_) then
 	       State
 	    [] lost then
                {Utils.printf "bot lost"}
