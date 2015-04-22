@@ -13,6 +13,7 @@ export
    PokemozMaxHp
    PokemozXPNeeded
    PokemozDatabaseName
+   Abs
 define
 
    Printf = System.showInfo
@@ -71,5 +72,9 @@ define
    MoveType = movetype(up down right left stay)
 
    AutoFight = 2
+
+   fun {Abs N}
+      if N > 0 then N else ~N end
+   end
 
 end

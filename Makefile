@@ -20,6 +20,9 @@ run: PokemozMain.ozf
 GameServer.ozf: GameServer.oz 
 	ozc -c GameServer.oz
 
+Pokemoz.ozf: Pokemoz.oz Utils.ozf
+	ozc -c Pokemoz.oz
+
 Trainer.ozf: Trainer.oz Utils.ozf
 	ozc -c Trainer.oz
 
@@ -32,7 +35,7 @@ Gui.ozf: Gui.oz Utils.ozf
 TrainerBot.ozf: TrainerBot.oz Utils.ozf
 	ozc -c TrainerBot.oz
 
-PokemozMain.ozf: PokemozMain.oz Gui.ozf Utils.ozf GameServer.ozf Trainer.ozf TrainerBot.ozf
+PokemozMain.ozf: PokemozMain.oz Gui.ozf Utils.ozf GameServer.ozf Trainer.ozf TrainerBot.ozf Pokemoz.ozf
 	ozc -c PokemozMain.oz
 
 clean:
