@@ -22,6 +22,7 @@ define
 
       fun {FightResult Pokemoz Result Direction Position}
    	if Result == win then
+                  {Send Gui consolemsg("You have win the fight congratulation !")}
                   {Send Gui pokemozchanged(Pokemoz Result)}
                   if Position == none then
                      state(waiting Direction Pokemoz)
@@ -29,7 +30,7 @@ define
                      state(playing Direction Position Pokemoz)
                   end
                else
-                    {Utils.printf "lost sending signal"}
+                  {Send Gui consolemsg("You have lost the fight too bad.")}
                   {Send Gui lost(Pokemoz)}               
                   {Send GameServer leave(Id)}
                   state(lost Pokemoz) 
@@ -56,7 +57,6 @@ define
       fun {Inbox State Msg}
 	 case State of state(pokemozpick Direction) then
 	    case Msg of pickpokemoz then
-	      {Utils.printf "picking pokemoz"}
 	      {Send Gui start}
 	      state(guistarted Direction)
              end
@@ -66,7 +66,7 @@ define
 	    [] pokemonchoosen(Type) then
    	      local Pokemoz in 
 	        Pokemoz = pokemoz(type:Type maxhp:20 hp:20 lvl:5 name:"Player Pokemoz" xp:0)
-                {Utils.printf "pokemon type choosen"}
+                {Send Gui consolemsg("You have choose a pokemoz of type"#Pokemoz.type)}
 	        state(waiting Direction Pokemoz)
 	      end 
             else
@@ -122,11 +122,12 @@ define
                {Send Gui play(Position)}
                State
 	    [] wildpokemoz(WildPokemoz) then
-                {Wildpokemoz WildPokemoz Pokemoz State}
+               {Wildpokemoz WildPokemoz Pokemoz State}
             [] guiwildchoice(Choice WildPokemoz) then
                if Choice == true then
                   {Send GameServer fight(Id Pokemoz WildPokemoz)}
                else
+                  {Send Gui consolemsg("You are trying to run away from "#WildPokemoz.name)}
                   {Send GameServer runway(Id WildPokemoz)}
                end
                State

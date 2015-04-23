@@ -31,6 +31,7 @@ define
 
    Window
    Grid
+   Console
    TextCanvas
 
 %%%%%%%%%% GUI Utils see below for Gui Port Object %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -114,7 +115,10 @@ define
       end
    end
 
-
+   proc {AddMsgConsole Msg ConsoleIndex}
+      % insert(I LVS): Inserts the list of virtual strings LVS just before the element at position I.
+      {Console insert(ConsoleIndex [Msg])}	
+   end
    
    proc {LoadTextures}
       CD = {OS.getCWD}
@@ -214,7 +218,16 @@ define
 	      lr(canvas(bg:gray
 			width:MapWidth
 			height:MapHeight
-			handle:Grid)))
+			handle:Grid)
+	        listbox(bg:white
+		       width:50
+		       height:17
+		       tdscrollbar:true
+		       handle:Console
+                       pady: 2
+                       )
+	      ))
+      
       Window={QTk.build Desc}
 	 
       {UpdateMap Map}
@@ -233,17 +246,20 @@ define
 	       {Utils.printf "showing windows"}
 	       {ShowWindow}
                {Send Trainer pokemonchoosen({PickPokemon})}
-	       state(listening)
+	       state(listening 0)
             else
                State
 	    end
 	
-	 [] state(listening) then
+	 [] state(listening ConsoleIndex) then
 	    case Msg of mapchanged(Map Players) then
                {UpdateMap Map}
 	       {UpdatePlayers Players}
 	       {UpdatePlayerInfo Players.1}
 	       State
+            [] consolemsg(Msg) then
+               {AddMsgConsole Msg ConsoleIndex}
+               state(listening ConsoleIndex+1)
             [] choicewild(OtherPokemoz) then
 	       {Send Trainer guiwildchoice({AskChoiceWild OtherPokemoz} OtherPokemoz)}
 	       State
