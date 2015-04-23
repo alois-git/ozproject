@@ -3,25 +3,25 @@ import
    Utils
    OS
 export
-   TrainerBot
+   TrainerAuto
 define
 
-fun {TrainerBot Trainer InitialMap}
+fun {TrainerAuto Trainer InitialMap}
 
  fun{Inbox State Msg}
-	 case State of state(starting) then
+	 case State of state(starting Map) then
 	    case Msg of start then
+	       % player should automaticly choose a pokemon (random)
                {Send Trainer pokemonchoosen(grass)}
-	       {Utils.printf "Bot choosing pokemoz"}
-               state(playing)
+               state(playing Map)
             else
                State
 	    end
-	
-	 [] state(playing) then
-	    case Msg of mapchanged(_ _) then
-	       State
+	 [] state(playing Map) then
+	    case Msg of mapchanged(Map _) then
+	       state(playing Map)
             [] play(_) then
+	       % player should analyse the map to know what to play
      	       local R in 
                   R = {Abs {OS.rand}} mod 100 + 1
                   if R < 4 then
@@ -30,17 +30,15 @@ fun {TrainerBot Trainer InitialMap}
                   State
                end
             [] choicewild(OtherPokemoz) then
-	       {Utils.printf "Bot calculate if should fight"}
+	       % player should choose to fight or not depending on which wild pokemon
                {Send Trainer guiwildchoice(true OtherPokemoz)}
 	       State
 	    [] pokemozchanged(_) then
 	       State
 	    [] lost then
-               {Utils.printf "bot lost"}
 	       {Send Trainer quit}
 	       State
 	    [] win then
-	       {Utils.printf "won"}
 	       State
 	    else
 	       State
@@ -48,7 +46,7 @@ fun {TrainerBot Trainer InitialMap}
 	 end
       end
    in
-      {Utils.newPortObject state(starting) Inbox}
+      {Utils.newPortObject state(starting InitialMap) Inbox}
    end
    
 end

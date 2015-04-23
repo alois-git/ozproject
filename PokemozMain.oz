@@ -6,7 +6,8 @@ import
    Utils
    GameServer
    Trainer
-   TrainerBot
+   TrainerAuto
+   TrainerNPC
 define
    %% Default values
    MAP = map
@@ -55,7 +56,7 @@ define
       {Utils.printf "#Speed :\t"#Args.speed}
       {Utils.printf "#Probability of wild pokemon:\t"#Args.wildprobability}
       
-      local Players Map GuiObject TrainerBotObject in
+      local Players Map GuiObject TrainerNPCObject in
 	 %{Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
 	 {Utils.printf "load map file"}
 	 %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
@@ -66,12 +67,12 @@ define
          PositionPlayer = pos(x:7 y:7)
          PositionPlayer2 = post(x:1 y:7)
          Players.1 = player(port:{Trainer.trainer 1 Game GuiObject Args.autofight} id:1 pos:PositionPlayer speed:Args.speed direction:left) 
-         Players.2 = player(port:{Trainer.trainer 2 Game TrainerBotObject Args.autofight} id:2 pos:PositionPlayer2 speed:Args.speed direction:right)
+         Players.2 = player(port:{Trainer.trainer 2 Game TrainerNPCObject Args.autofight} id:2 pos:PositionPlayer2 speed:Args.speed direction:right)
     
 	 {Utils.printf "load gui"}
 	 GuiObject = {Gui.gui Players.1.port Map}
          {Utils.printf "load bot"}
-         TrainerBotObject = {TrainerBot.trainerBot Players.2.port Map}
+         TrainerNPCObject = {TrainerNPC.trainerNPC Players.2.port Map}
 
 	 {Utils.printf "Init game"}
 	 Game = {GameServer.gameServer Map Players Args.wildprobability Args.runawayproba}
