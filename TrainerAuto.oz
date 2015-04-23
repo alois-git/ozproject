@@ -31,7 +31,17 @@ fun {TrainerAuto Trainer InitialMap}
                end
             [] choicewild(OtherPokemoz) then
 	       % player should choose to fight or not depending on which wild pokemon
-               {Send Trainer guiwildchoice(true OtherPokemoz)}
+               % depending on type / level / current pokemoz hp
+               % evaluation functions is as a weighted sum of various factors
+               local R Pokemoz in
+                  {Send Trainer getpokemoz(Pokemoz)}
+                  R = 1* Pokemoz.lvl - 1* OtherPokemoz.lvl + 2 * Pokemoz.hp
+                  if R > 20 then
+                    {Send Trainer guiwildchoice(true OtherPokemoz)}
+                  else
+                    {Send Trainer guiwildchoice(false OtherPokemoz)}
+                  end
+               end
 	       State
 	    [] pokemozchanged(_) then
 	       State
