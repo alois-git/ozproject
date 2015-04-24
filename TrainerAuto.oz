@@ -1,12 +1,37 @@
 functor
 import
    Utils
-   OS
 export
    TrainerAuto
 define
 
 fun {TrainerAuto Trainer InitialMap}
+
+ % get the best move to minimize the manathan distance between the player and the goal
+ fun {GetNextMove Position JayPosition}
+    local ManathanD in
+       ManathanD = {Abs (JayPosition.x - Position.x)} + {Abs (JayPosition.y - Position.y)}
+       {GetNextMoveRec Position JayPosition ManathanD 1 Utils.moveType.1}
+    end
+ end
+ 
+ % recursive method to get the best move, keeping the current minimum manathan distance and the best move found
+ fun {GetNextMoveRec Position JayPosition ManathanDistance MoveIndex SelectedMove}
+    local NewPosition NewManathanDistance in
+      NewPosition = {Utils.calculateNewPos Position Utils.moveType.MoveIndex}
+      NewManathanDistance = {Abs (JayPosition.x - NewPosition.x)} + {Abs (JayPosition.y - NewPosition.y)}
+      % if we tried all the move return the best found
+      if MoveIndex > 4 then
+         SelectedMove
+      % if the current manathan distance is smaller take it as the minimum and change the selected move
+      elseif NewManathanDistance < ManathanDistance then
+        {GetNextMoveRec Position JayPosition NewManathanDistance MoveIndex+1 Utils.moveType.MoveIndex}
+      % else just try a new move
+      else
+        {GetNextMoveRec Position JayPosition ManathanDistance MoveIndex+1 SelectedMove}
+      end
+    end
+ end
 
  fun{Inbox State Msg}
 	 case State of state(starting Map) then
@@ -22,11 +47,10 @@ fun {TrainerAuto Trainer InitialMap}
 	       state(playing Map)
             [] play(_) then
 	       % player should analyse the map to know what to play
-     	       local R in 
-                  R = {Abs {OS.rand}} mod 100 + 1
-                  if R < 4 then
-        	     {Send Trainer move(Utils.moveType.R)}
-                  end
+     	       local Position JayPosition in
+                  JayPosition = {Map.getJayPosition}
+                  {Send Trainer getposition(Position)} 
+        	  {Send Trainer move({GetNextMove Position JayPosition})}
                   State
                end
             [] choicewild(OtherPokemoz) then

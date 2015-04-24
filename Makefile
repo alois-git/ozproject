@@ -35,13 +35,16 @@ Utils.ozf: Utils.oz
 Gui.ozf: Gui.oz Utils.ozf
 	$(OZC) Gui.oz
 
+Map.ozf: Map.oz 
+	$(OZC)	Map.oz
+
 TrainerAuto.ozf: TrainerAuto.oz Utils.ozf
 	$(OZC) TrainerAuto.oz
 
 TrainerNPC.ozf: TrainerNPC.oz Utils.ozf
 	$(OZC)	TrainerNPC.oz
 
-PokemozMain.ozf: PokemozMain.oz Gui.ozf Utils.ozf GameServer.ozf Trainer.ozf TrainerAuto.ozf TrainerNPC.ozf Pokemoz.ozf
+PokemozMain.ozf: PokemozMain.oz Gui.ozf Utils.ozf GameServer.ozf Trainer.ozf TrainerAuto.ozf TrainerNPC.ozf Pokemoz.ozf Map.ozf
 	$(OZC) PokemozMain.oz
 
 clean:

@@ -141,6 +141,9 @@ define
      	    [] getdirection(D) then
                D = Direction
                State
+            [] getposition(P) then
+               P = Position
+               State
 	    [] mapchanged(Map Players) then
 	       {MapChanged Map Players State}
 	    else

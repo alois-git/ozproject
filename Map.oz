@@ -3,7 +3,7 @@ export
    SetupMap
    Redraw
    GetTerrain
-
+   GetJayPosition
 define
    Layout
    Width
@@ -50,6 +50,22 @@ define
             end
          end
       end
+   end
+
+   fun {GetJayPosition}
+      {GetJayPositionRec 0 0}
+   end
+
+   fun {GetJayPositionRec X Y}
+     if {GetTerrain pos(x:X y:Y)} == 2 then
+        pos(x:X y:Y)
+     elseif X > Width then
+       {GetJayPositionRec 0 Y+1}
+     elseif Y > Height then
+       {GetJayPositionRec X+1 0}
+     else
+       none
+     end
    end
 
 end
