@@ -9,7 +9,7 @@ define
 fun {TrainerNPC Trainer InitialMap}
 
  fun{Inbox State Msg}
-	 case State of state(starting Map) then
+	 case State of state(starting) then
 	    case Msg of start then
                % TrainerNPC could be initialize with a pokemon to choose from
 	       % or random (for now)
@@ -17,14 +17,14 @@ fun {TrainerNPC Trainer InitialMap}
                   R = ({Abs {OS.rand}} mod 2) +1
                   {Send Trainer pokemonchoosen(Utils.pokemozType.R)}
                end
-               state(playing Map)
+               state(playing)
             else
                State
 	    end
 	
-	 [] state(playing Map) then
-	    case Msg of mapchanged(Map _) then
-	       state(playing Map)
+	 [] state(playing) then
+	    case Msg of mapchanged(_ _) then
+	       state(playing)
             [] play(_) then
                 % should not move or move just a bit 
                 % horizontaly or verticaly

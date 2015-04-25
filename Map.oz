@@ -4,6 +4,7 @@ export
    Redraw
    GetTerrain
    GetJayPosition
+   GetPositionsAround
 define
    Layout
    Width
@@ -66,6 +67,28 @@ define
      else
        none
      end
+   end
+   
+   fun {CalculateNewPos P MoveType}
+      case MoveType of up then
+	 p(x:P.x y:P.y-1)
+      [] down then
+	 p(x:P.x y:P.y+1)
+      [] left then
+	 p(x:P.x-1 y:P.y)
+      [] right then
+	 p(x:P.x+1 y:P.y)
+      end
+   end
+
+   fun {GetPositionsAround Position}
+      local Up Down Right Left in
+         Up =  {CalculateNewPos Position up}
+         Down = {CalculateNewPos Position down}
+         Left = {CalculateNewPos Position left}
+         Right  = {CalculateNewPos Position right}
+         [Up Down Left Right]
+      end
    end
 
 end

@@ -50,7 +50,7 @@ define
       end
 
       fun {MapChanged Map Players State}
-	 {Send Gui mapchanged(Map Players)}
+	 {Send Gui mapchanged(Players)}
 	 State
       end
       
