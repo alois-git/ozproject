@@ -6,6 +6,15 @@ Le design :
 gameserver <----> trainer <-----> Gui / TrainerBot
 
 Le Gui c'est pour le joueur principale et le trainerBot c'est pour les trainer en plus sur la map.
+-------------------------------------------------
+25/04
+
+Changements :
+
+- Changer la list de joueur qui est un tuple en list ?
+- Changer la map par le functor map
+- Le trainer connais sa position et ce n'est plus stocké dans le server ?
+
 
 -------------------------------------------------
 22/04
