@@ -8,6 +8,7 @@ import
    Trainer
    TrainerAuto
    TrainerNPC
+   Map
 define
    %% Default values
    MAP = map
@@ -56,26 +57,29 @@ define
       {Utils.printf "#Speed :\t"#Args.speed}
       {Utils.printf "#Probability of wild pokemon:\t"#Args.wildprobability}
       
-      local Players Map GuiObject TrainerNPCObject in
+      local Players MapObject GuiObject TrainerNPCObject TrainerAutoObject Players1 Players2 in
 	 %{Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
 	 {Utils.printf "load map file"}
 	 %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
-	 Map = map( r(1 1 1 0 0 0 0) r(1 1 1 0 0 1 1) r(1 1 1 0 0 1 1) r(0 0 0 0 0 1 1) r(0 0 0 1 1 1 1) r(0 0 0 1 1 0 0) r(0 0 0 0 0 0 0))
-
+	 MapObject = map( r(1 1 1 0 0 0 0) r(1 1 1 0 0 1 1) r(1 1 1 0 0 1 1) r(0 0 0 0 0 1 1) r(0 0 0 1 1 1 1) r(0 0 0 1 1 0 0) r(0 0 0 0 0 0 0))
+         {Map.setupMap default}
 	 {Utils.printf "Init player"}
-         Players = {MakeTuple players 2}
-         PositionPlayer = pos(x:7 y:7)
-         PositionPlayer2 = post(x:1 y:7)
-         Players.1 = player(port:{Trainer.trainer 1 Game GuiObject Args.autofight} id:1 pos:PositionPlayer speed:Args.speed direction:left) 
-         Players.2 = player(port:{Trainer.trainer 2 Game TrainerNPCObject Args.autofight} id:2 pos:PositionPlayer2 speed:Args.speed direction:right)
-    
-	 {Utils.printf "load gui"}
-	 GuiObject = {Gui.gui Players.1.port Map}
-         {Utils.printf "load bot"}
-         TrainerNPCObject = {TrainerNPC.trainerNPC Players.2.port Map}
 
+         PositionPlayer = pos(x:7 y:7)
+         PositionPlayer2 = pos(x:1 y:7)
+         Players1 = player(port:{Trainer.trainer 1 Game TrainerAutoObject Args.autofight} id:1 pos:PositionPlayer speed:Args.speed direction:left) 
+         Players2 = player(port:{Trainer.trainer 2 Game TrainerNPCObject Args.autofight} id:2 pos:PositionPlayer2 speed:Args.speed direction:right)
+
+         Players = Players1|Players2|nil
+
+
+	 {Utils.printf "load gui"}
+	 GuiObject = {Gui.gui  Players1.port MapObject}
+         {Utils.printf "load bot"}
+         TrainerNPCObject = {TrainerNPC.trainerNPC Players2.port MapObject}
+         TrainerAutoObject = {TrainerAuto.trainerAuto Players1.port GuiObject MapObject}
 	 {Utils.printf "Init game"}
-	 Game = {GameServer.gameServer Map Players Args.wildprobability Args.runawayproba}
+	 Game = {GameServer.gameServer MapObject Players Args.wildprobability Args.runawayproba}
 
 	 {Utils.printf "Start game"}
 	 {Send Game start}

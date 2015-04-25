@@ -47,7 +47,7 @@ fun {TrainerNPC Trainer InitialMap}
 	 end
       end
    in
-      {Utils.newPortObject state(starting InitialMap) Inbox}
+      {Utils.newPortObject state(starting) Inbox}
    end
    
 end

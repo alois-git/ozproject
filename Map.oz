@@ -1,4 +1,6 @@
 functor
+import
+  Utils
 export
    SetupMap
    Redraw
@@ -38,9 +40,8 @@ define
       skip
    end
 
-   fun {GetTerrain Pos}
-      case Pos of pos(x:X y:Y) then
-         if X < 1 orelse y < 1 orelse X > Width orelse Y > Height then
+   fun {GetTerrain X Y}
+         if X < 1 orelse Y < 1 orelse X > Width orelse Y > Height then
             none
          else
             case Layout.Y.X
@@ -50,22 +51,24 @@ define
             [] 3 then center
             end
          end
-      end
    end
 
    fun {GetJayPosition}
-      {GetJayPositionRec 0 0}
+      {GetJayPositionRec 1 1}
    end
 
    fun {GetJayPositionRec X Y}
-     if {GetTerrain pos(x:X y:Y)} == 2 then
+     {Utils.printf X#Y}
+     if X > Width andthen Y > Height then
+        none
+     elseif {GetTerrain X Y} == jay then
         pos(x:X y:Y)
      elseif X > Width then
-       {GetJayPositionRec 0 Y+1}
+       {GetJayPositionRec 1 Y+1}
      elseif Y > Height then
-       {GetJayPositionRec X+1 0}
+       {GetJayPositionRec X+1 1}
      else
-       none
+       {GetJayPositionRec X+1 Y}
      end
    end
    

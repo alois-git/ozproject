@@ -67,6 +67,7 @@ define
    	      local Pokemoz in 
 	        Pokemoz = pokemoz(type:Type maxhp:20 hp:20 lvl:5 name:"Player Pokemoz" xp:0)
                 {Send Gui consolemsg("You have choose a pokemoz of type"#Pokemoz.type)}
+                {Utils.printf "waiting state for player: "#Id}
 	        state(waiting Direction Pokemoz)
 	      end 
             else
@@ -81,7 +82,7 @@ define
             end
 	 [] state(waiting Direction Pokemoz) then
 	    case Msg of play(Position) then
-               {Send Gui play(Position)}
+               {Send Gui play}
 	       state(playing Direction Position Pokemoz)
 	    [] wildpokemoz(WildPokemoz) then
                {Wildpokemoz WildPokemoz Pokemoz State}
@@ -111,6 +112,7 @@ define
 		  state(playing Direction Position Pokemoz)
 	       end
 	    else
+               {Utils.printf msg}
 	       State
 	    end
 	    

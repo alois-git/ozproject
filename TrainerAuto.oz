@@ -6,7 +6,7 @@ export
    TrainerAuto
 define
    
-   fun {TrainerAuto Trainer InitialMap}
+   fun {TrainerAuto Trainer Gui InitialMap}
 
      
       % get the best move to minimize the manathan distance between the player and the goal + the number of trainer around
@@ -17,7 +17,7 @@ define
 	    local NewPosition NewManathanDistance NumberOfTrainerAround TerrainType NewWeight in
 	       NewPosition = {Utils.calculateNewPos Position Utils.moveType.MoveIndex}
 	       NewManathanDistance = {Abs (JayPosition.x - NewPosition.x)} + {Abs (JayPosition.y - NewPosition.y)}
-	       NumberOfTrainerAround = {GetNumberTrainerNPCAround Map.getPositionsAround(NewPosition) TrainersNPC}
+	       NumberOfTrainerAround = {GetNumberTrainerNPCAround {Map.getPositionsAround NewPosition} TrainersNPC}
                TerrainType = Map.getTerrain(NewPosition)
                NewWeight = NewManathanDistance + NumberOfTrainerAround + TerrainType
                % if we tried all the move return the best found
@@ -73,6 +73,8 @@ define
 	 case State of state(starting) then
 	    case Msg of start then
 	       % player should automaticly choose a pokemon (random)
+               {Send Gui startauto}
+               {Utils.printf "auto choosed pokemoz"}
 	       {Send Trainer pokemonchoosen(grass)}
 	       state(playing none)
 	    else
@@ -80,13 +82,18 @@ define
 	    end
 	 [] state(playing Trainers) then
 	    case Msg of mapchanged(Trainers) then
+               {Send Gui mapchanged(Trainers)}
 	       state(playing Trainers)
-	    [] play(_) then
+	    [] play then
 	       % player should analyse the map to know what to play
+               {Utils.printf "auto should play"}
 	       local Position JayPosition in
 		  JayPosition = {Map.getJayPosition}
-		  {Send Trainer getposition(Position)} 
+                    {Utils.printf "got jay position from map"}
+		  {Send Trainer getposition(Position)}
+                  {Utils.printf "got position from trainer"}
 		  {Send Trainer move({GetNextMove Position JayPosition Trainers})}
+                  {Utils.printf "playing this move:"#{GetNextMove Position JayPosition Trainers}}
 		  State
 	       end
 	    [] choicewild(OtherPokemoz) then
@@ -103,10 +110,11 @@ define
 		  end
 	       end
 	       State
-	    [] pokemozchanged(_) then
+	    [] pokemozchanged(Pokemoz) then
+               {Send Gui pokemozchanged(Pokemoz)}
 	       State
 	    [] lost then
-	       {Send Trainer quit}
+               {Send Gui lost}
 	       State
 	    [] win then
 	       State
@@ -116,7 +124,7 @@ define
 	 end
       end
    in
-      {Utils.newPortObject state(starting InitialMap) Inbox}
+      {Utils.newPortObject state(starting) Inbox}
    end
    
 end

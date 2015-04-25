@@ -208,58 +208,64 @@ define
       end
 
       % Remove a player from the player list.
-      fun {RemovePlayer Id Players NewPlayers IndexA IndexB MaxIndex}
-
-         if IndexA > MaxIndex then
-            NewPlayers
-         else
-           if Players.IndexA.id \= Id then
-               NewPlayers.IndexB = Players.IndexA  
-              {RemovePlayer Id Players NewPlayers IndexA+1 IndexB+1 MaxIndex}
-           else
-              {RemovePlayer Id Players NewPlayers IndexA+1 IndexB MaxIndex}
-	   end
-         end
-      end
-
-      fun {GetPlayerByIdRec Id Players CurrentIndex MaxIndex}
-         if CurrentIndex > MaxIndex then
-            none
-         elseif Players.CurrentIndex.id == Id then
-            Players.CurrentIndex
-         else
-            {GetPlayerByIdRec Id Players CurrentIndex+1 MaxIndex}
-         end
+      fun {RemovePlayer Id Players}
+         fun {RemovePlayerRec Id Players NewPlayers}
+           case Players of nil then
+              NewPlayers
+           [] H|T then
+               if H.id == Id then
+                  T
+               else
+                 {RemovePlayerRec Id T H|NewPlayers}
+               end
+           end
+        end
+        in
+	{RemovePlayerRec Id Players nil}
       end
 
       fun {GetPlayerById Id Players}
-         {GetPlayerByIdRec Id Players 1 {Width Players}}
+         fun {GetPlayerByIdRec Id Players}
+           case Players of nil then
+               none
+           [] H|T then
+              if H.id == Id then
+                 H
+              else
+                {GetPlayerByIdRec Id T}
+              end
+           end
+         end
+      in
+         {GetPlayerByIdRec Id Players}
       end
 
       %notify all players that something has changed on the map
-      proc {SendMapChangedToAllPlayers Map Players}
-         for I in 1..{Width Players} do
-           {Send Players.I.port mapchanged(Map Players)}
+      proc {SendMessageToAllPlayers Players Message}
+         proc {SendMessageToAllPlayersRec Players Message}
+           case Players of H|T then
+              {Send H.port Message}
+              {SendMessageToAllPlayersRec T Message}
+           end
          end
+        in
+         {SendMessageToAllPlayersRec Players Message}
       end
 
       fun {Inbox State Msg}
 	 case State of state(starting Map Players) then
 	    case Msg of start then
 	       %Start the game tell the player to pick a pokemoz
-	       for I in 1..{Width Players} do
-		  {Send Players.I.port pickpokemoz}
-		  {Send Players.I.port mapchanged(Map Players)}
-	       end
+               {SendMessageToAllPlayers Players pickpokemoz}
+               {SendMessageToAllPlayers Players mapchanged(Map Players)}
+               {Utils.printf "listening server"}
 	       state(listening Map Players)
 	    else
 	       {Utils.printf "server not started please start the server"}
 	    end
 	 [] state(listening Map Players) then
 	    case Msg of round then
-               for I in 1..{Width Players} do
-	        {Send Players.I.port play(Players.I.pos)}
-               end
+               {SendMessageToAllPlayers Players play}
 	       State
             [] getplayers(Id P) then
                P = {GetPlayerById Id Players}.port
@@ -275,7 +281,7 @@ define
 		     State
 		  else
 		     UpdatedPlayers = {UpdatePlayerPosition Id Players CurrentPlayer Position Direction}
-                     {SendMapChangedToAllPlayers Map UpdatedPlayers}
+                     {SendMessageToAllPlayers Players mapchanged(Map UpdatedPlayers)}
 		     % if we are in a grass area check wilpokemoz, danger ! 
 		     if Obj == 1 then
 			if {IsThereWildPokemoz} == true then
@@ -314,16 +320,15 @@ define
 	         State
                end
             [] leave(Id) then
-               local W UpdatedPlayers NewP in
+               local W UpdatedPlayers in
                  {Utils.printf "trainer leaving lost"#Id}
                  if ( ({Width Players}-1) > 0) then
                     W =  ({Width Players}-1)
                  else
                     W = 0
                  end 
-                 NewP = {MakeTuple players W}
-                 UpdatedPlayers = {RemovePlayer Id Players NewP  1 1 {Width Players}}
-                 {SendMapChangedToAllPlayers Map UpdatedPlayers}
+                 UpdatedPlayers = {RemovePlayer Id Players}
+                 {SendMessageToAllPlayers Players mapchanged(Map UpdatedPlayers)}
 	         state(listening Map UpdatedPlayers)
                end
 	    [] quit then

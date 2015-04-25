@@ -241,19 +241,21 @@ define
       fun{Inbox State Msg}
 	 case State of state(starting) then
 	    case Msg of start then
-	       {Utils.printf "build gui map"}
 	       {LoadMapWindow InitialMap}
-	       {Utils.printf "showing windows"}
 	       {ShowWindow}
                {Send Trainer pokemonchoosen({PickPokemon})}
 	       state(listening 0)
+            [] startauto then
+               {LoadMapWindow InitialMap}
+	       {ShowWindow}
+               state(listening 0)
             else
                State
 	    end
 	
 	 [] state(listening ConsoleIndex) then
 	    case Msg of mapchanged(Map Players) then
-               {UpdateMap Map}
+               %{UpdateMap Map}
 	       {UpdatePlayers Players}
 	       {UpdatePlayerInfo Players.1}
 	       State
@@ -265,20 +267,16 @@ define
 	       State
 	    [] pokemozchanged(Pokemoz Result) then
                % if lvlup Pokemon gained a boost 346 EXP. Points !
-               {Utils.printf "pokemoz changed"}
 	       {UpdatePlayerPokemozInfo Pokemoz Result}
 	       State
 	    [] lost(Pokemoz) then
-               {Utils.printf "lost !!!!! dialog must appear"}
                {UpdatePlayerPokemozInfo Pokemoz lost}
                if {Lost} == true then
                  {CloseWindow}
-                 {Utils.printf "close windows"}
 	         {Send Trainer quit}
                end
 	       State
 	    [] win then
-	       {Utils.printf "won"}
 	       State
 	    else
 	       State
