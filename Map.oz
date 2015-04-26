@@ -34,10 +34,15 @@ define
          Width = MapLayout.width
          Height = MapLayout.height
       end
+      {Draw}
+   end
+
+   proc {Draw}
+      skip % TODO
    end
 
    proc {Redraw NPCs PC}
-      skip
+      skip % TODO
    end
 
    fun {GetTerrain X Y}
