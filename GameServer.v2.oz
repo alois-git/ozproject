@@ -2,6 +2,7 @@ functor
 import
    Utils
    Map
+
 export
    StartGameServer
    StopGameServer
@@ -40,9 +41,9 @@ define
       {Utils.newPortObject InitGameState FunGameState}
    end
 
-   proc {StartGameServer MapLayout NPCs PC Delay}
+   proc {StartGameServer MapLayout NPCs PC TicTime}
       GameState = {NewGameState}
-      thread {Tic NPCs Delay} end
+      thread {Tic NPCs TicTime} end
       {Map.setupMap MapLayout}
       {Send GameState run}
    end
@@ -60,19 +61,22 @@ define
       end
    end
 
-   proc {Tic NPCs Delay}
+   proc {Tic NPCs Time}
       R in
-      {Wait Delay}
+      {Delay Time}
       {Send GameState get(ret(R))}
-      if R == running then {SendPlayersNotificationMove NPCs} end
-      {Tic NPCs Delay}
+      if R == running then 
+         {SendPlayersNotification move NPCs} 
+         {SendPlayersNotification look NPCs} 
+      end
+      {Tic NPCs Time}
    end
 
-   proc {SendPlayersNotificationMove NPCs}
+   proc {SendPlayersNotification Notif NPCs}
       case NPCs
       of M|N then
-         {Send M move}
-         {SendPlayersNotificationMove N}
+         {Send M Notif}
+         {SendPlayersNotification Notif N}
       [] nil then skip
       end
    end
