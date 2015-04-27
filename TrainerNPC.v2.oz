@@ -61,7 +61,7 @@ define
             {Send S.super get(dir ret(D))}
             if {SearchForPlayer P D S.range} then
                {MoveToPlayer P D S.super}
-               % {BattleUtils.startTrainerBattle S.super GameServer.pC}
+               {BattleUtils.battleTrainer S.super GameServer.pC}
             end
             S
          else
