@@ -35,13 +35,6 @@ define
    TextCanvas
 
 %%%%%%%%%% GUI Utils see below for Gui Port Object %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   fun {GetAt Map X Y}
-      if X > 0 andthen X =< WidthInCell andthen Y > 0 andthen Y =< HeightInCell then
-	 Map.Y.X
-      else
-	 ~1
-      end
-   end
    
    proc {UpdatePlayerInfo Player}
       local P in
@@ -67,7 +60,7 @@ define
    proc {DrawMap Map Position}
       % Path = 0 and Grass = 1 but need to add one because start at 1
       local TextureNumber in
-	 TextureNumber =  {GetAt Map Position.x Position.y}+1
+	 TextureNumber =  {Map.getTerrain Position.x Position.y}+1
 	 {DrawImage MapTextures.TextureNumber Position}
       end
    end
@@ -96,7 +89,7 @@ define
         else
             PlayerIcon = TrainerLeft
         end
-      {Grid create(image WidthCell*Player.pos.x-(WidthCell div 2) HeightCell*Player.pos.y-(HeightCell div 2) image:PlayerIcon)}
+        {Grid create(image WidthCell*Player.pos.x-(WidthCell div 2) HeightCell*Player.pos.y-(HeightCell div 2) image:PlayerIcon)}
    end
 
    proc {UpdateMap Map}
@@ -153,7 +146,24 @@ define
        {{QTk.build Desc} show}
        if Y then true else false end 
     end  
-   end
+  end
+
+  fun {NPCFightPopUp NPC}
+     local Y 
+       Desc=lr(label(init: NPC.name#"is attacking you")
+                canvas(bg:gray
+			width:50
+			height:50
+			handle:Grid)
+		button(text:"Attack" 
+                      return:Y
+                      action:toplevel#close))
+    in 
+       {{QTk.build Desc} show}
+       if Y then true else false end 
+    end  
+
+  end
 
   fun {Lost}
     local Y 
@@ -165,7 +175,7 @@ define
        {{QTk.build Desc} show}
        if Y then true else true end 
     end  
-   end
+  end
 
   fun {PickPokemon}
     local G W F
@@ -193,11 +203,7 @@ define
       {Window close}
    end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-   fun {Gui Trainer InitialMap}
-
-   proc {LoadMapWindow Map}
+   proc {LoadMainWindow}
       Desc
    in
       % Loading textures from files
@@ -229,24 +235,25 @@ define
 	      ))
       
       Window={QTk.build Desc}
-	 
-      {UpdateMap Map}
       {Window bind(event:"<Up>" action:proc{$} {Send Trainer move(up)} end)}
       {Window bind(event:"<Left>" action:proc{$} {Send Trainer move(left)} end)}
       {Window bind(event:"<Down>" action:proc{$} {Send Trainer move(down)}  end)}
       {Window bind(event:"<Right>" action:proc{$} {Send Trainer move(right)} end)}
-      {Window bind(event:"<Escape>" action:proc{$} {CloseWindow} end)}
    end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   fun {Gui Trainer InitialMap}
       
       fun{Inbox State Msg}
 	 case State of state(starting) then
 	    case Msg of start then
-	       {LoadMapWindow InitialMap}
+	       {LoadMainWindow}
 	       {ShowWindow}
                {Send Trainer pokemonchoosen({PickPokemon})}
 	       state(listening 0)
             [] startauto then
-               {LoadMapWindow InitialMap}
+               {LoadMainWindow}
 	       {ShowWindow}
                state(listening 0)
             else
@@ -254,11 +261,14 @@ define
 	    end
 	
 	 [] state(listening ConsoleIndex) then
-	    case Msg of mapchanged(Map Players) then
-               %{UpdateMap Map}
-	       {UpdatePlayers Players}
-	       {UpdatePlayerInfo Players.1}
+	    case Msg of draw(Map) then
+               {UpdateMap Map}
 	       State
+            [] redraw(NPCs PC) then
+               {UpdatePlayerInfo PC}
+               {UpdatePlayers PC}
+               {UpdatePlayers NPCs}
+               State
             [] consolemsg(Msg) then
                {AddMsgConsole Msg ConsoleIndex}
                state(listening ConsoleIndex+1)
@@ -269,6 +279,9 @@ define
                % if lvlup Pokemon gained a boost 346 EXP. Points !
 	       {UpdatePlayerPokemozInfo Pokemoz Result}
 	       State
+            [] fightNPC(NPC) then
+               {Send Trainer fight({NPCFightPopUp NPC})}
+               State
 	    [] lost(Pokemoz) then
                {UpdatePlayerPokemozInfo Pokemoz lost}
                if {Lost} == true then
