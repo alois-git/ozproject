@@ -11,9 +11,8 @@ define
    Layout
    Width
    Height
-   GuiPort
 
-   proc {SetupMap MapLayout Gui}
+   proc {SetupMap MapLayout}
       %% Setup the map.
       %% MapLayout must be of layout(map:map(r(...) [r(...)]) width:W height:H)
       %%    or default
@@ -35,16 +34,15 @@ define
          Width = MapLayout.width
          Height = MapLayout.height
       end
-      GuiPort = Gui
       {Draw}
    end
 
    proc {Draw}
-      {Send GuiPort draw(Layout)}
+      skip
    end
 
    proc {Redraw NPCs PC}
-      {Send GuiPort redraw(NPCs PC)}
+      skip
    end
 
    fun {GetTerrain X Y}

@@ -1,160 +1,61 @@
 functor
 import
-%   Gui
    Utils
-%   GameServer
+   GameServer
+   Map
 export
-   Trainer
+   NewTrainer
+
 define
-   fun {Trainer Id GameServer Gui AUTOFIGHT}
-      
-%      fun {FightTrainer PlayerPokemoz OtherPlayerPokemoz}
-%	 true
-%      end
-%
-%      fun {FightPokemoz PlayerPokemoz OtherPokemoz}
-%	 true
-%      end
-%
-%      fun {ShouldFight Poke OtherPoke}
-%	 true
-%      end
+   
+   fun {NewTrainer Pokemoz Pos Direction}
+      %% This object represent a trainer (any trainer)
+      %% Available messages :
+      %%    move -- always forward
+      %%    turn(DIRECTION)
+      %%       where DIRECTION is one of the following : up down left right
+      %%    fight(POKEMOZ) -- tell this trainer pokemoz to attack the other one
+      %%       where POKEMOZ is an instance of the pokemoz object representing the enemy
+      %%    haslost(ret(RETURN))
+      %%       where RETURN in an unbound variable to be bound to either true or false
+      %%    get(ATTRIBUTE ret(RETURN))
+      %%       where ATTRIBUTES is one of the following : pkmz, pos, dir
+      %%       and RETURN is an unbound variable
 
-      fun {FightResult Pokemoz Result Direction Position}
-   	if Result == win then
-                  {Send Gui consolemsg("You have win the fight congratulation !")}
-                  {Send Gui pokemozchanged(Pokemoz Result)}
-                  if Position == none then
-                     state(waiting Direction Pokemoz)
-                  else
-                     state(playing Direction Position Pokemoz)
-                  end
-               else
-                  {Send Gui consolemsg("You have lost the fight too bad.")}
-                  {Send Gui lost(Pokemoz)}               
-                  {Send GameServer leave(Id)}
-                  state(lost Pokemoz) 
-        end
-     end
+      InitTrainer = trainer(pkmz:Pokemoz pos:Pos dir:Direction)
 
-
-      fun {Wildpokemoz WildPokemoz Pokemoz State}
-	     if AUTOFIGHT == 0 then
-                {Send GameServer runway(Id WildPokemoz)}
-               elseif AUTOFIGHT == 1 then
-		{Send GameServer fight(Id Pokemoz WildPokemoz)}
-               else
-                {Send Gui choicewild(WildPokemoz)}
-               end
-	       State
-      end
-
-      fun {MapChanged Map Players State}
-	 {Send Gui mapchanged(Players)}
-	 State
-      end
-      
-      fun {Inbox State Msg}
-	 case State of state(pokemozpick Direction) then
-	    case Msg of pickpokemoz then
-	      {Send Gui start}
-	      state(guistarted Direction)
-             end
-         [] state(guistarted Direction) then
-            case Msg of mapchanged(Map Players) then
-	       {MapChanged Map Players State}
-	    [] pokemonchoosen(Type) then
-   	      local Pokemoz in 
-	        Pokemoz = pokemoz(type:Type maxhp:20 hp:20 lvl:5 name:"Player Pokemoz" xp:0)
-                {Send Gui consolemsg("You have choose a pokemoz of type"#Pokemoz.type)}
-                {Utils.printf "waiting state for player: "#Id}
-	        state(waiting Direction Pokemoz)
-	      end 
-            else
-              State
+      fun {FunTrainer S Msg}
+         case Msg
+         of move then   
+            NewPos in    
+              NewPos = {Map.calculateNewPos S.pos S.dir}
+            if GameServer.gameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none then
+              case S.dir
+                of up    then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y-1)) dir:S.dir)
+                [] down  then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y+1)) dir:S.dir)
+                [] left  then trainer(pkmz:S.pkmz pos:pos(x:(S.pos.x-1) y:S.pos.y) dir:S.dir)
+                [] right then trainer(pkmz:S.pkmz pos:pos(x:(S.pos.x+1) y:S.pos.y) dir:S.dir)
+              end
             end
-         [] state(lost Pokemoz) then
-            case Msg of getpokemoz(P) then
-               P = Pokemoz
-               State
-            else
-              State
-            end
-	 [] state(waiting Direction Pokemoz) then
-	    case Msg of play(Position) then
-               {Send Gui play}
-	       state(playing Direction Position Pokemoz)
-	    [] wildpokemoz(WildPokemoz) then
-               {Wildpokemoz WildPokemoz Pokemoz State}
-	    [] playerfight(_) then
-	       State
-	    [] fightresult(Pokemoz Result) then
-               {FightResult Pokemoz Result Direction none}
-	    [] mapchanged(Map Players) then
-	       {MapChanged Map Players State}
-            [] getpokemoz(P) then
-               P = Pokemoz
-               State
-            [] getdirection(D) then
-               D = Direction
-               State
-            [] guiwildchoice(Choice WildPokemoz) then
-               if Choice == true then
-                  {Send GameServer fight(Id Pokemoz WildPokemoz)}
-               else
-                  {Send GameServer runway(Id WildPokemoz)}
-               end
-               State
-	    [] invalidaction(Position Msg) then
-	       if Msg == lost then
-		  State
-	       else
-		  state(playing Direction Position Pokemoz)
-	       end
-	    else
-               {Utils.printf msg}
-	       State
-	    end
-	    
-	 [] state(playing Direction Position Pokemoz) then
-	    case Msg of move(MoveType) then             
-	       {Send GameServer move(Id {Utils.calculateNewPos Position MoveType} MoveType)}
-	       state(waiting MoveType Pokemoz)
-            [] play(Position) then
-               {Send Gui play(Position)}
-               State
-	    [] wildpokemoz(WildPokemoz) then
-               {Wildpokemoz WildPokemoz Pokemoz State}
-            [] guiwildchoice(Choice WildPokemoz) then
-               if Choice == true then
-                  {Send GameServer fight(Id Pokemoz WildPokemoz)}
-               else
-                  {Send Gui consolemsg("You are trying to run away from "#WildPokemoz.name)}
-                  {Send GameServer runway(Id WildPokemoz)}
-               end
-               State
-	    [] playerfight(_) then
-	       State
-	    [] fightresult(Pokemoz Result) then
-               {FightResult Pokemoz Result Direction Position}
- 	    [] getpokemoz(P) then
-               P = Pokemoz
-	       State
-     	    [] getdirection(D) then
-               D = Direction
-               State
-            [] getposition(P) then
-               P = Position
-               State
-	    [] mapchanged(Map Players) then
-	       {MapChanged Map Players State}
-	    else
-	       State
-	    end
-	 end
+            
+         [] turn(D) then
+            trainer(pkmz:S.pkmz pos:S.pos dir:D)
+         [] fight(P) then
+            {Send P attackedby(S.pkmz)}
+            S
+         [] haslost(ret(R)) then
+            {Send S.pkmz isko(ret(R))}
+            S
+         [] get(D ret(R)) then
+            R = S.D
+            S
+         [] setpokemoz(P) then
+            trainer(pkmz:P pos:S.pos dir:S.dir)
+         end
       end
+
    in
-      % creating new player with up direction and state to choose initial pokemoz
-	{Utils.newPortObject state(pokemozpick up) Inbox}
+      {Utils.newPortObject InitTrainer FunTrainer}
    end
+
 end
