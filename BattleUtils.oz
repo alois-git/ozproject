@@ -49,9 +49,10 @@ define
             {BattleTrainerPlayerTurn NPC Player}
          end
       end
-
+      Ack
    in
-      {Send GameServer.gameState wait}
+      {Send GameServer.gameState wait(Ack)}
+      {Wait Ack}
       {BattleTrainerPlayerTurn NPC Player}
    end
 
@@ -88,9 +89,10 @@ define
             {BattleWildPlayerTurn Pokemoz Player}
          end
       end
-
+      Ack
    in
-      {Send GameServer.gameState wait}
+      {Send GameServer.gameState wait(Ack)}
+      {Wait Ack}
       {BattleWildPlayerTurn Pokemoz Player}
    end
       
