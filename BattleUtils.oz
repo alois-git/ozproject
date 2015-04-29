@@ -1,5 +1,6 @@
 functor
 import
+   QTk at 'x-oz://system/wp/GTk.ozf'
    GameServer
    Pokemoz
    OS
@@ -8,12 +9,21 @@ export
    BattleTrainer
    WalkInGrass
    SetupBattle
+   DrawBattleUI
 
 define
    Probability
+   Type
+   Screen
 
    proc {SetupBattle P}
+      F G W CD in
+      CD = {OS.getCWD}
       Probability = P
+      F = {QTk.newImage photo(file:CD#'/images/type_grass.gif' width:150 height:200)}
+      G = {QTk.newImage photo(file:CD#'/images/type_fire.gif' width:150 height:200)}
+      W = {QTk.newImage photo(file:CD#'/images/type_water.gif' width:150 height:200)}
+      Type = type(fire:F grass:G water:W)
    end
 
    proc {BattleTrainer NPC Player}
@@ -105,5 +115,26 @@ define
       end
    end
 
+
+   proc {DrawBattleUI Pkmz1 Pkmz2}
+      H1 H2 L1 L2 T1 T2 in
+      {{QTk.build lr(
+                  label(init:"Battle")
+                  canvas(  width:90
+                           height:90
+                           handle:Screen)
+                  )}
+            show}
+      {Send Pkmz1 get(hp ret(H1))}
+      {Send Pkmz2 get(hp ret(H2))}
+      {Send Pkmz1 get(lx ret(L1))}
+      {Send Pkmz2 get(lx ret(L2))}
+      {Send Pkmz1 get(type ret(T1))}
+      {Send Pkmz2 get(type ret(T2))}
+
+      {Screen create(image 15 0 anchor:nw image:Type.T1)}
+      {Screen create(image 225 0 anchor:nw image:Type.T2)}
+      
+   end
 
 end
