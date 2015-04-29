@@ -1,349 +1,109 @@
 functor
 import
    Utils
-   OS
+   Map
+
 export
-   GameServer
-   WaitEndGame
+   StartGameServer
+   StopGameServer
+   NotifyMapChanged
+   IsPosFree
+   GameState
+   PC
+
 define
-%  DELAY = 200
-   WaitEnd
-   WaitEndGame
+   GameState
+   NPCs
+   PC
 
-   proc {WaitEndGame}
-      {Wait WaitEnd}
-   end
+   fun {NewGameState}
+      %% This object memorize the current state of the game (running, waiting, finished)
+      %% Available messages :
+      %%    run
+      %%    wait
+      %%    finish
+      %%    get(ret(RETURN))
+      %%       where RETURN is an unbound variable
 
-   fun {GameServer Map Players WILDPOKEMOZPROBA RUNAWAYCHANCES}
+      InitGameState = waiting
 
-      % function to see if there is a wild pokemoz in the grass
-      fun {IsThereWildPokemoz}
-         ({Abs {OS.rand}} mod 100) < WILDPOKEMOZPROBA 
-      end
- 
-      fun {IsRunAwaySuccessfull}
-         ({Abs {OS.rand}} mod 100) < RUNAWAYCHANCES 
-      end
-
-      % Generate a random pokemoz with a min level of 5 and a random extra level depending on other pokemon
-      fun {GenerateRandomPokemoz Pokemoz}
-	 local TypeIndex Type Lvl NameIndex Name in
-	    TypeIndex = ({Abs {OS.rand}} mod 3) + 1
-            Lvl = 5 %% + ({Abs {OS.rand}} mod (Pokemoz.lvl-5))
-            NameIndex = ({Abs {OS.rand}} mod 5) + 1
-            Type = Utils.pokemozType.TypeIndex
-            Name = Utils.pokemozDatabaseName.Type.NameIndex
-	    pokemoz(hp:Utils.pokemozMaxHp.Lvl lvl:Lvl type:Type maxhp:Utils.pokemozMaxHp.Lvl name:Name#"(wild pokemoz)" xp:0)
-	 end
-      end
-
-      fun {GetDamages Pokemoz1 Pokemoz2}
-	 local Proba R in 
-	    Proba = (( 6 + Pokemoz1.lvl - Pokemoz2.lvl) * 9)
-	    R = {Abs {OS.rand}}  mod 101
-	    if R > Proba then
-	       %{Utils.printf Pokemoz1.name#" attack failed"}
-	       0
-	    else
-	       %{Utils.printf Pokemoz1.name#" attack succeded"}
-	       if Pokemoz1.type == Pokemoz2.type then
-		  2
-	       elseif Pokemoz1.type == grass then
-		  if Pokemoz2.type == fire then
-		     1
-		  else
-		     3
-		  end
-	       elseif Pokemoz1.type == fire then
-		  if Pokemoz2.type == grass then
-		     3
-		  else
-		     1
-		  end
-	       elseif Pokemoz1.type == water then
-		  if Pokemoz2.type == grass then
-		     1
-		  else
-		     3
-		  end
-	       end
-	    end
-	 end
-      end
-
-      fun {Fight Pokemoz1 Pokemoz2}
-	 if Pokemoz1.hp > 0 andthen Pokemoz2.hp > 0 then
-	    local DamageBy1 DamageBy2 NewPok1 NewPok2 in
-	       DamageBy1 = {GetDamages Pokemoz1 Pokemoz2}
-	       DamageBy2 = {GetDamages Pokemoz2 Pokemoz1}
-	       NewPok1 = pokemoz(type:Pokemoz1.type maxhp:Pokemoz1.maxhp hp:Pokemoz1.hp-DamageBy2 lvl:Pokemoz1.lvl name:Pokemoz1.name xp:Pokemoz1.xp)
-	       NewPok2 = pokemoz(type:Pokemoz2.type maxhp:Pokemoz2.maxhp hp:Pokemoz2.hp-DamageBy1 lvl:Pokemoz2.lvl name:Pokemoz2.name xp:Pokemoz2.xp)
-	       {Fight NewPok1 NewPok2}
-	    end
-	 else
-            fight(playerpokemoz:Pokemoz1 otherpokemoz:Pokemoz2)
-	 end
-      end
-
-      fun {GainXP Pokemoz XP}
-	local IndexLvl CurrentXP NeededXPToLvlUp NewXP NewLvl NewMaxHp in
-          CurrentXP = Pokemoz.xp + XP
-          IndexLvl = Pokemoz.lvl-4
-          NeededXPToLvlUp = Utils.pokemozXPNeeded.IndexLvl
-          if Pokemoz.lvl < 10 andthen CurrentXP > NeededXPToLvlUp then
-            NewXP = CurrentXP - NeededXPToLvlUp
-            NewLvl = Pokemoz.lvl+1
-            NewMaxHp = Utils.pokemozMaxHp.(NewLvl-4)
-            pokemoz(type:Pokemoz.type maxhp:NewMaxHp hp:NewMaxHp lvl:NewLvl name:Pokemoz.name xp:NewXP)
-          else
-            pokemoz(type:Pokemoz.type maxhp:Pokemoz.maxhp hp:Pokemoz.hp lvl:Pokemoz.lvl name:Pokemoz.name xp:CurrentXP)
-          end  
-	end
-      end
-
-      % get what type of area is at that position
-      fun {GetAt Map X Y}
-	 local WidthInCell HeightInCell in
-	    WidthInCell = {Record.width Map.1}
-	    HeightInCell = {Record.width Map}
-	    if X > 0 andthen X =< WidthInCell andthen Y > 0 andthen Y =< HeightInCell then
-	       Map.Y.X
-	    else
-	       ~1
-	    end
-	 end
-      end
-
-      fun {IsPositionFree Id Players Position Index IndexMax}
-        if Index > IndexMax then
-         true
-        elseif Players.Index.id \= Id andthen Players.Index.pos.x == Position.x andthen Players.Index.pos.y == Position.y then
-         false
-        else
-         {IsPositionFree Id Players Position Index+1 IndexMax}
-        end
-      end
-
-      fun {GetPlayerAtPosition Position Players}
-        {GetPlayerAtPositionRec Position Players 1 {Width Players}}
-      end
-
-      fun {GetPlayerAtPositionRec Position Players Index IndexMax}
-        if Index > IndexMax then
-         none
-        elseif Players.Index.pos.x == Position.x andthen Players.Index.pos.y == Position.y then
-         Players.Index
-        else
-         {GetPlayerAtPositionRec Position Players Index+1 IndexMax}
-        end
-      end
-
-      fun {GetTrainerAround Position Players}
-          local Up Down Right Left in
-           Up =  {GetPlayerAtPosition {Utils.calculateNewPos Position up} Players}
-           Down = {GetPlayerAtPosition {Utils.calculateNewPos Position down} Players}
-           Left = {GetPlayerAtPosition {Utils.calculateNewPos Position left} Players}
-           Right  = {GetPlayerAtPosition {Utils.calculateNewPos Position right} Players}
-           [Up Down Left Right]
-          end
-      end
-  
-      proc {FightWithTrainers Player Trainers}
-         {FightWithTrainersRec Player Trainers}
-      end
-
-      proc {FightWithTrainersRec Player Trainers}
-         case Trainers of nil then
-
-              skip
-         [] H|T then
-            if H \= none then
-              local P1 P2 Result FinalResultTrainer FinalResultPlayer in
-                {Send Player.port getpokemoz(P1)}
-                {Send H.port getpokemoz(P2)}
-	        Result = {Fight P1 P2}
-                % depending on the result send message to player and other trainer
-                if Result.playerpokemoz.hp > 0 then
-	           FinalResultPlayer = fightresult({GainXP Result.playerpokemoz Result.otherpokemoz.lvl} win)
-                   FinalResultTrainer = fightresult(Result.otherpokemoz lost)
-	        else
-	           FinalResultPlayer = fightresult(Result.playerpokemoz lost)
-                   FinalResultTrainer = fightresult({GainXP Result.otherpokemoz Result.playerpokemoz.lvl} win)
-	        end
-	        
-                {Send Player.port FinalResultPlayer}
-                {Send H.port FinalResultTrainer}
-              end
+      fun {FunGameState S Msg}
+         if S == finished then finished
+         else
+            case Msg
+            of run then running
+            [] wait(Ack) then Ack=unit waiting
+            [] get(ret(R)) then R=S S
             end
-            {FightWithTrainersRec Player T}
          end
-      end
- 
-      fun {CheckValidPosition Id Position Players}
-	 local WidthInCell HeightInCell in
-	    WidthInCell = {Record.width Map.1}
-	    HeightInCell = {Record.width Map}
-	    if Position.x > 0 andthen Position.x =< WidthInCell andthen Position.y > 0 andthen  Position.y =< HeightInCell then
-               % if the position is correct we still have to check if no player is already at that position
-               {IsPositionFree Id Players Position 1 {Width Players}}
-	    else
-	       false
-	    end
-	 end
-      end
-
-      % Update a player position in the player list.
-      fun {UpdatePlayerPosition Id Players Player NewPosition Direction}
-	 local NewPlayers in
-	    NewPlayers = {MakeTuple players {Width Players}}
-	    for I in 1..{Width Players} do
-	       if I == Id then
-		  NewPlayers.I = player(port:Player.port pos:NewPosition id:Player.id speed:Player.speed direction:Direction)   
-	       else
-		  NewPlayers.I = Players.I
-	       end
-	    end
-	    NewPlayers
-	 end
-      end
-
-      % Remove a player from the player list.
-      fun {RemovePlayer Id Players}
-         fun {RemovePlayerRec Id Players NewPlayers}
-           case Players of nil then
-              NewPlayers
-           [] H|T then
-               if H.id == Id then
-                  T
-               else
-                 {RemovePlayerRec Id T H|NewPlayers}
-               end
-           end
-        end
-        in
-	{RemovePlayerRec Id Players nil}
-      end
-
-      fun {GetPlayerById Id Players}
-         fun {GetPlayerByIdRec Id Players}
-           case Players of nil then
-               none
-           [] H|T then
-              if H.id == Id then
-                 H
-              else
-                {GetPlayerByIdRec Id T}
-              end
-           end
-         end
-      in
-         {GetPlayerByIdRec Id Players}
-      end
-
-      %notify all players that something has changed on the map
-      proc {SendMessageToAllPlayers Players Message}
-         proc {SendMessageToAllPlayersRec Players Message}
-           case Players of H|T then
-              {Send H.port Message}
-              {SendMessageToAllPlayersRec T Message}
-           end
-         end
-        in
-         {SendMessageToAllPlayersRec Players Message}
-      end
-
-      fun {Inbox State Msg}
-	 case State of state(starting Map Players) then
-	    case Msg of start then
-	       %Start the game tell the player to pick a pokemoz
-               {SendMessageToAllPlayers Players pickpokemoz}
-               {SendMessageToAllPlayers Players mapchanged(Map Players)}
-               {Utils.printf "listening server"}
-	       state(listening Map Players)
-	    else
-	       {Utils.printf "server not started please start the server"}
-	    end
-	 [] state(listening Map Players) then
-	    case Msg of round then
-               {SendMessageToAllPlayers Players play}
-	       State
-            [] getplayers(Id P) then
-               P = {GetPlayerById Id Players}.port
-               State
-	    [] move(Id Position Direction) then
-	       local Obj UpdatedPlayers CurrentPlayer in
-		  % Get what type of area it is at that position (grass/road/trainer)
-		  Obj = {GetAt Map Position.x Position.y}
-		  % Check if the position the player want to move to is valid
-                  CurrentPlayer = {GetPlayerById Id Players}
-		  if {CheckValidPosition Id Position Players} == false then
-		     {Send CurrentPlayer.port invalid(wrongmove CurrentPlayer.pos)}
-		     State
-		  else
-		     UpdatedPlayers = {UpdatePlayerPosition Id Players CurrentPlayer Position Direction}
-                     {SendMessageToAllPlayers Players mapchanged(Map UpdatedPlayers)}
-		     % if we are in a grass area check wilpokemoz, danger ! 
-		     if Obj == 1 then
-			if {IsThereWildPokemoz} == true then
-			   local P in
-                           {Send CurrentPlayer.port getpokemoz(P)}
-			   {Send CurrentPlayer.port wildpokemoz({GenerateRandomPokemoz P})}
-			   end
-			end
-		     end
-                     % check if any trainer is around and if yes start a fight
-                     {FightWithTrainers CurrentPlayer {GetTrainerAround Position UpdatedPlayers}}
-		     state(listening Map UpdatedPlayers)
-		  end
-	       end
-	    [] runway(Id WildPokemoz) then
-               {Utils.printf "trying to run away from a wild pokemon"}
-               if {IsRunAwaySuccessfull} == false then
-                  {Utils.printf "run away failed"}
-                  local P in
-                    {Send {GetPlayerById Id Players}.port getpokemoz(P)}
-                    {Utils.printf "send player combat result"}
-		    {Send {GetPlayerById Id Players}.port {Fight P WildPokemoz}}
-                  end
-               end
-	       State
-	    [] fight(Id PlayerPokemoz OtherPokemoz) then
-	       {Utils.printf "fighting a wild pokemon"}
-               local Result FinalResult in 
-                 Result = {Fight PlayerPokemoz OtherPokemoz}
-                 if Result.playerpokemoz.hp > 0 then
-	           FinalResult = fightresult({GainXP Result.playerpokemoz Result.otherpokemoz.lvl} win)
-	         else
-	           FinalResult = fightresult(Result.playerpokemoz lost)
-	         end
-	         {Send {GetPlayerById Id Players}.port FinalResult}
-	         State
-               end
-            [] leave(Id) then
-               local W UpdatedPlayers in
-                 {Utils.printf "trainer leaving lost"#Id}
-                 if ( ({Width Players}-1) > 0) then
-                    W =  ({Width Players}-1)
-                 else
-                    W = 0
-                 end 
-                 UpdatedPlayers = {RemovePlayer Id Players}
-                 {SendMessageToAllPlayers Players mapchanged(Map UpdatedPlayers)}
-	         state(listening Map UpdatedPlayers)
-               end
-	    [] quit then
-	       {Utils.printf "shutting down game server"}
-               state(stopped)
-	    else
-	       {Utils.printf "invalid message"}
-	    end
-	 [] state(stopped) then
-            {Utils.printf "setting waitend"}
-            WaitEnd = true
-	    state(stopped)
-	 end
       end
    in
-      {Utils.newPortObject state(starting Map Players) Inbox}
+      {Utils.newPortObject InitGameState FunGameState}
    end
+
+   proc {StartGameServer MapLayout NPCs PC TicTime}
+      GameState = {NewGameState}
+      thread {Tic NPCs TicTime} end
+      {Map.setupMap MapLayout}
+      {Send GameState run}
+   end
+
+   proc {StopGameServer Status}
+      %% This proc stops the server and display the victory / defeat notification
+      {Send GameState finish}
+      if status == victory then
+         {Utils.printf "Congratulations, you have won the game."}
+         {Utils.printf "Jay would be so proud of you."}
+      else
+         {Utils.printf "Doom doom doom..."}
+         {Utils.printf "You have lost the game."}
+         {Utils.printf "You must play more to be the very best !"}
+      end
+   end
+
+   proc {Tic NPCs Time}
+      R in
+      {Delay Time}
+      {Send GameState get(ret(R))}
+      if R == running then 
+         {SendPlayersNotification move NPCs} 
+         {SendPlayersNotification look NPCs} 
+      end
+      {Tic NPCs Time}
+   end
+
+   proc {SendPlayersNotification Notif NPCs}
+      case NPCs
+      of M|N then
+         {Send M Notif}
+         {SendPlayersNotification Notif N}
+      [] nil then skip
+      end
+   end
+
+   proc {NotifyMapChanged}
+      {Map.redraw NPCs PC}
+   end
+
+   fun {IsPosFree Pos}
+      %% Return false if a trainer in on this position pos(x:X y:Y), true otherwise
+
+      fun {IsPosFreeRec Pos Trainers}
+         case Trainers
+         of H|T then
+            local R in
+            {Send H get(position ret(R))}
+            if R == Pos then
+               false
+            else
+               {IsPosFreeRec Pos T}
+            end end
+         [] nil then
+            true
+         end
+      end
+   in
+      {IsPosFreeRec Pos PC|NPCs}
+   end
+
 end

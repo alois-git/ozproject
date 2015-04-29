@@ -148,23 +148,6 @@ define
     end  
   end
 
-  fun {NPCFightPopUp NPC}
-     local Y 
-       Desc=lr(label(init: NPC.name#"is attacking you")
-                canvas(bg:gray
-			width:50
-			height:50
-			handle:Grid)
-		button(text:"Attack" 
-                      return:Y
-                      action:toplevel#close))
-    in 
-       {{QTk.build Desc} show}
-       if Y then true else false end 
-    end  
-
-  end
-
   fun {Lost}
     local Y 
        Desc=lr(label(init: "Your pokemoz got killed, you have lost ! sad :( ")
@@ -280,7 +263,6 @@ define
 	       {UpdatePlayerPokemozInfo Pokemoz Result}
 	       State
             [] fightNPC(NPC) then
-               {Send Trainer fight({NPCFightPopUp NPC})}
                State
 	    [] lost(Pokemoz) then
                {UpdatePlayerPokemozInfo Pokemoz lost}

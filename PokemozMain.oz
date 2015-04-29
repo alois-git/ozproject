@@ -5,8 +5,7 @@ import
    Gui
    Utils
    GameServer
-   Trainer
-   TrainerAuto
+   TrainerManual
    TrainerNPC
    Map
 define
@@ -31,12 +30,7 @@ define
 	      autofight(single char:&a type:int default:AUTOFIGHT)
               help(single char:&h default:false)
               )}
-   local
-      Game
-      PositionPlayer
-      PositionPlayer2
-      RoundLoop
-   in
+
    %% Show help
       if Args.help then
 	 {Utils.printf "Usage: "#{Property.get 'application.url'}#" [option]"}
@@ -52,53 +46,21 @@ define
 	 {Application.exit 0}
       end
       
-      {Utils.printf "Map name:\t"#Args.map}
-      {Utils.printf "#Number of pokemon you can have:\t"#Args.pokemoz}
-      {Utils.printf "#Speed :\t"#Args.speed}
-      {Utils.printf "#Probability of wild pokemon:\t"#Args.wildprobability}
-      
-      local Players MapObject GuiObject TrainerNPCObject TrainerAutoObject Players1 Players2 in
+      local Player NPCs in
 	 %{Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
 	 {Utils.printf "load map file"}
 	 %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
-	 MapObject = map( r(1 1 1 0 0 0 0) r(1 1 1 0 0 1 1) r(1 1 1 0 0 1 1) r(0 0 0 0 0 1 1) r(0 0 0 1 1 1 1) r(0 0 0 1 1 0 0) r(0 0 0 0 0 0 0))
          {Map.setupMap default}
 	 {Utils.printf "Init player"}
 
-         PositionPlayer = pos(x:7 y:7)
-         PositionPlayer2 = pos(x:1 y:7)
-         Players1 = player(port:{Trainer.trainer 1 Game TrainerAutoObject Args.autofight} id:1 pos:PositionPlayer speed:Args.speed direction:left) 
-         Players2 = player(port:{Trainer.trainer 2 Game TrainerNPCObject Args.autofight} id:2 pos:PositionPlayer2 speed:Args.speed direction:right)
+         Player = {TrainerManual.newTrainerManual {Gui.pickpokemoz} pos(x:7 y:7) left}
+         NPCs = {TrainerNPC.newTrainerNPC  pos(x1 y:7) left false 0}|nil
 
-         Players = Players1|Players2|nil
-
-
-	 {Utils.printf "load gui"}
-	 GuiObject = {Gui.gui  Players1.port MapObject}
-         {Utils.printf "load bot"}
-         TrainerNPCObject = {TrainerNPC.trainerNPC Players2.port MapObject}
-         TrainerAutoObject = {TrainerAuto.trainerAuto Players1.port GuiObject MapObject}
 	 {Utils.printf "Init game"}
-	 Game = {GameServer.gameServer MapObject Players Args.wildprobability Args.runawayproba}
-
-	 {Utils.printf "Start game"}
-	 {Send Game start}
-
-   	proc {RoundLoop Delay}
-            {Time.delay Delay}    
-	    {Send Game round}
-            {RoundLoop Delay}
-   	end
-	
-          thread
-            {RoundLoop ((10 - Args.speed) * Args.delay)}
-	  end
-	
+	 {GameServer.startGameServer Map.layout NPCs Player Delay}
 
       end
 
-      {GameServer.waitEndGame}
       {Utils.printf "Leaving app"}
       {Application.exit 0}
-   end
 end
