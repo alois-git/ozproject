@@ -1,6 +1,6 @@
 functor
 import
-   QTk at 'x-oz://system/wp/GTk.ozf'
+   QTk at 'x-oz://system/wp/QTk.ozf'
    GameServer
    Pokemoz
    OS
@@ -20,9 +20,9 @@ define
       F G W CD in
       CD = {OS.getCWD}
       Probability = P
-      F = {QTk.newImage photo(file:CD#'/images/type_grass.gif' width:150 height:200)}
-      G = {QTk.newImage photo(file:CD#'/images/type_fire.gif' width:150 height:200)}
-      W = {QTk.newImage photo(file:CD#'/images/type_water.gif' width:150 height:200)}
+      F = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
+      G = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
+      W = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
       Type = type(fire:F grass:G water:W)
    end
 
@@ -119,9 +119,8 @@ define
    proc {DrawBattleUI Pkmz1 Pkmz2}
       H1 H2 L1 L2 T1 T2 in
       {{QTk.build lr(
-                  label(init:"Battle")
-                  canvas(  width:90
-                           height:90
+                  canvas(  width:900
+                           height:900
                            handle:Screen)
                   )}
             show}
@@ -131,10 +130,15 @@ define
       {Send Pkmz2 get(lx ret(L2))}
       {Send Pkmz1 get(type ret(T1))}
       {Send Pkmz2 get(type ret(T2))}
-
-      {Screen create(image 15 0 anchor:nw image:Type.T1)}
-      {Screen create(image 225 0 anchor:nw image:Type.T2)}
+      {Screen create(text 0 0 anchor:nw text:H1)}
+      {Screen create(text 0 200 anchor:nw text:L1)}
+    
+      {Screen create(image 150 0 anchor:nw image:Type.T1)}
+      {Screen create(image 450 0 anchor:nw image:Type.T2)}
       
+      {Screen create(text 750 0 anchor:nw text:H2)}
+      {Screen create(text 750 200 anchor:nw text:L2)}
+
    end
 
 end
