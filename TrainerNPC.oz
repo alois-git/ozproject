@@ -34,7 +34,8 @@ define
          R NewPos
       in
          case Msg
-         of move then
+         of move(Time) then
+            {Delay {Abs {OS.rand}} mod Time} % to mitigate race problems and give illusion of fluid
             if S.move then % skip this part if the npc is set not to move
                R = {Abs {OS.rand}} mod 100
                if R < 25 then
@@ -42,7 +43,7 @@ define
                      {Send S.super get(pos ret(P))}
                      {Send S.super get(dir ret(D))}
                      NewPos = {Map.calculateNewPos P D}
-                     if {Map.getTerrain NewPos.x NewPos.y} == road andthen {GameServer.isPosFree NewPos} then
+                     if {Map.getTerrain NewPos.x NewPos.y} == road then
                         {Send S.super move}
                      end
                   end
@@ -100,4 +101,5 @@ define
          {MoveToPlayer NewPos Dir Trainer}
       end
    end
+
 end
