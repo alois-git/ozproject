@@ -45,12 +45,13 @@ define
    proc {StartGameServer MapLayout NPCsP PCP TicTime WildProba}
       GameState = {NewGameState}
       thread {Tic NPCs TicTime} end
-      {Map.setupMap MapLayout}
+      {Map.setupMap MapLayout PCP}
       {BattleUtils.setupBattle WildProba}
       {Send GameState run}
       NPCs = NPCsP
       PC = PCP
       {NotifyMapChanged}
+      {Map.addMsgConsole "Welcome to pokemoz !"}
    end
 
    proc {StopGameServer Status}
@@ -84,7 +85,6 @@ define
    end
 
    proc {NotifyMapChanged}
-      {Utils.printf "redraw npc/pc"}
       {Map.redraw NPCs PC}
    end
 

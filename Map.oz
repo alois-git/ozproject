@@ -31,20 +31,23 @@ define
    WidthCell
    HeightCell
    HeightText
+   ConsolePort
 
-   proc {SetupMap MapLayout}
-      local CD in
+   proc {SetupMap MapLayout PCP}
+
+      local CD F G W in
       CD = {OS.getCWD}
+
       %% Load textures
       Grass = {QTk.newImage photo(file:CD#'/images/grass.gif')}
       Path = {QTk.newImage photo(file:CD#'/images/path.gif')}
       Center = {QTk.newImage photo(file:CD#'/images/path.gif')}
       Jay = {QTk.newImage photo(file:CD#'/images/path.gif')}
-
       TrainerUp = {QTk.newImage photo(file:CD#'/images/trainerUp.gif')}
       TrainerDown = {QTk.newImage photo(file:CD#'/images/trainerDown.gif')}
       TrainerLeft = {QTk.newImage photo(file:CD#'/images/trainerLeft.gif')}
       TrainerRight = {QTk.newImage photo(file:CD#'/images/trainerRight.gif')}
+
       end
       MapTextures = maptextures(Path Grass Jay Center)
 
@@ -73,11 +76,11 @@ define
          Width = MapLayout.width
          Height = MapLayout.height
       end
-      {InitWindow}
+      {InitWindow PCP}
       {Draw}
    end
 
-   proc {InitWindow}
+   proc {InitWindow Trainer}
       local MapWidth MapHeight Desc in
       MapWidth = WidthCell * Width
       MapHeight = HeightCell * Height
@@ -98,11 +101,12 @@ define
                        pady: 2)))
 
       Window={QTk.build Desc}
+
+      {Window bind(event:"<Up>" action:proc{$} {Send Trainer guimove(up)} end)}
+      {Window bind(event:"<Left>" action:proc{$} {Send Trainer guimove(left)} end)}
+      {Window bind(event:"<Down>" action:proc{$} {Send Trainer guimove(down)}  end)}
+      {Window bind(event:"<Right>" action:proc{$} {Send Trainer guimove(right)} end)}
       {Window show}
-      %{Window bind(event:"<Up>" action:proc{$} {Send Trainer move(up)} end)}
-      %{Window bind(event:"<Left>" action:proc{$} {Send Trainer move(left)} end)}
-      %{Window bind(event:"<Down>" action:proc{$} {Send Trainer move(down)}  end)}
-      %{Window bind(event:"<Right>" action:proc{$} {Send Trainer move(right)} end)}
       end
    end
 
@@ -159,7 +163,8 @@ define
 
    proc {AddMsgConsole Msg ConsoleIndex}
       % insert(I LVS): Inserts the list of virtual strings LVS just before the element at position I.
-      {Console insert(ConsoleIndex [Msg])}
+      % 0 is adding at the start and it is very nice for log
+      {Console insert(0 [Msg])}
    end
 
    proc {Draw}
@@ -193,11 +198,15 @@ define
    end
 
    fun {PickPokemoz}
-     local G W F
+     local G W F ImgF ImgG ImgW CD
+        CD = {OS.getCWD}
+        ImgF = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
+        ImgG = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
+        ImgW = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
         Desc=lr(label(init: "Pick the type of your pokemon")
-                button(text:"Grass" return:G action:toplevel#close)
-                button(text:"Water" return:W action:toplevel#close)
-                button(text:"Fire" return:F action:toplevel#close))
+                button(image:ImgG return:G action:toplevel#close)
+                button(image:ImgW return:W action:toplevel#close)
+                button(image:ImgF return:F action:toplevel#close))
      in
         {{QTk.build Desc} show}
         if G then grass elseif W then water elseif F then fire end

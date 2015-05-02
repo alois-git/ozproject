@@ -7,28 +7,12 @@ export
    Printf
    CalculateNewPos
    MoveType
-   AutoFight
    LoadMapFile
-   PokemozType
-   PokemozMaxHp
-   PokemozXPNeeded
-   PokemozDatabaseName
 define
 
    Printf = System.showInfo
 
-   PokemozType = pokemoztype(water grass fire)
-  
-   PokemozMaxHp = pokemozmaxhp(20 22 24 26 28 30)
-   
-   PokemozXPNeeded = pokemozxpneeded(5 12 20 30 50)
-
-   PokemozDatabaseName = pokemozdatabasename( 
-	water: water("Squirtle" "Psyduck" "Poliwag" "Steel" "Shellder" "Krabby") 
-	grass: grass("Bulbasaur" "Oddish" "Bellsprout" "Tangela" "Exeggcute" "Paras") 
-	fire: fire("Charmander" "Vulpix" "Growlithe" "Ponyta" "Magmar" "Flareon"))
-
-   fun {NewPortObject Init Fun}  
+   fun {NewPortObject Init Fun}
       proc {MsgLoop S1 State}
 	 case S1 of Msg|S2 then
 	    {MsgLoop S2 {Fun State Msg}}
@@ -69,7 +53,5 @@ define
    end
 
    MoveType = movetype(up down right left stay)
-
-   AutoFight = 2
 
 end
