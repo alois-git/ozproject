@@ -161,7 +161,7 @@ define
       {DrawText "Type:\t"#P.type p(x:4 y:6)}
    end
 
-   proc {AddMsgConsole Msg ConsoleIndex}
+   proc {AddMsgConsole Msg}
       % insert(I LVS): Inserts the list of virtual strings LVS just before the element at position I.
       % 0 is adding at the start and it is very nice for log
       {Console insert(0 [Msg])}
