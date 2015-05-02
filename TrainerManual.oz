@@ -2,7 +2,7 @@ functor
 import
    Utils
    Trainer
-
+   GameServer
 export
    NewTrainerManual
 
@@ -26,8 +26,13 @@ define
       fun {FunTrainerManual S Msg}
          case Msg
          of guimove(NewDirection) then
+            Position NewPos GameState in
             if NewDirection == Direction then
-               {Send S.super move}
+               {Send GameServer.gameState get(ret(GameState))}
+               NewPos = {Map.calculateNewPos Position NewDirection}
+               if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
+                 {Send S.super move}
+               end
             else
                {Send S.super turn(NewDirection)}
             end

@@ -60,10 +60,10 @@ define
             P D in
             {Send S.super get(pos ret(P))}
             {Send S.super get(dir ret(D))}
-            if {SearchForPlayer P D S.range} then
-               {MoveToPlayer P D S.super}
-               {BattleUtils.battleTrainer S.super GameServer.pC}
-            end
+            %if {SearchForPlayer P D S.range} then
+            %   {MoveToPlayer P D S.super}
+            %   {BattleUtils.battleTrainer S.super GameServer.pC}
+            %end
             S
          else
             {Send S.super Msg}

@@ -4,6 +4,7 @@ import
   OS
 export
    SetupMap
+   Draw
    Redraw
    GetTerrain
    GetJayPosition

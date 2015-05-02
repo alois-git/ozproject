@@ -28,17 +28,18 @@ define
       InitTrainerAuto = pc(super:Super)
 
       fun {FunTrainerAuto S Msg}
-        R NewPos in
+        R NewPos Dir in
          case Msg of move(Time) then
-            {Utils.printf "move !"}
-            NewMove Position in
-	    {Send S.super get(pos ret(Position))}
-            {Utils.printf "got pos"}
+            NewMove Position NewPos GameState in
+	          {Send S.super get(pos ret(Position))}
             NewMove = {GetNextMove Position {Map.getJayPosition}}
-            
-            {Utils.printf "got next move"}
-            if NewMove == Direction then
-               {Send S.super move}
+            {Send S.super get(dir ret(Dir))}
+            if NewMove == Dir then
+               NewPos = {Map.calculateNewPos Position NewMove}
+               {Send GameServer.gameState get(ret(GameState))}
+               if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
+                  {Send S.super move}
+               end
             else
                {Send S.super turn(NewMove)}
             end
@@ -62,10 +63,9 @@ define
 
            NewPosition = {Utils.calculateNewPos Position Utils.moveType.MoveIndex}
            NewManathanDistance = {Abs (JayPosition.x - NewPosition.x)} + {Abs (JayPosition.y - NewPosition.y)}
-           NumberOfTrainerAround = {GetNumberTrainerNPCAround {Map.getPositionsAround NewPosition}}
-           TerrainType = {Map.getTerrain NewPosition.x NewPosition.y}
-           NewWeight = NewManathanDistance + NumberOfTrainerAround + TerrainType
-           {Utils.printf MoveIndex}
+           %NumberOfTrainerAround = {GetNumberTrainerNPCAround {Map.getPositionsAround NewPosition}}
+           %TerrainType = {Map.getTerrain NewPosition.x NewPosition.y}
+           NewWeight = NewManathanDistance
            if MoveIndex > 4 then
              SelectedMove
            elseif NewWeight < Weight then
@@ -77,8 +77,8 @@ define
          end
         end
       in
-    
-       {GetNextMoveRec Position JayPosition 0 1 none}
+
+       {GetNextMoveRec Position JayPosition 0 1 up}
       end
 
 
@@ -92,6 +92,7 @@ define
               {GetNumberTrainerNPCAroundRec T A}
              end
           [] nil then
+
              A
           end
         end

@@ -37,6 +37,8 @@ define
 	 p(x:P.x-1 y:P.y)
       [] right then
 	 p(x:P.x+1 y:P.y)
+      else
+      p(x:P.x y:P.y)
       end
    end
 

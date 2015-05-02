@@ -33,7 +33,7 @@ define
          else
             case Msg
             of run then running
-            [] wait(Ack) then Ack=unit waiting 
+            [] wait(Ack) then Ack=unit waiting
             [] get(ret(R)) then R=S S
             end
          end
@@ -46,8 +46,7 @@ define
       GameState = {NewGameState}
       NPCs = NPCsP
       PC = PCP
-      thread {Tic NPCs TicTime} end
-      thread {Tic PC|nil TicTime} end
+      thread {Tic NPCs PC|nil TicTime} end
       {Map.setupMap MapLayout PCP}
       {BattleUtils.setupBattle WildProba}
       {Send GameState run}
@@ -68,11 +67,13 @@ define
       end
    end
 
-   proc {Tic NPCs Time}
+   proc {Tic NPCs PC Time}
       {Delay Time}
       {SendPlayersNotification move(Time) NPCs}
       {SendPlayersNotification look NPCs}
-      {Tic NPCs Time}
+      {SendPlayersNotification move(Time) PC}
+      {NotifyMapChanged}
+      {Tic NPCs PC Time}
    end
 
    proc {SendPlayersNotification Notif NPCs}
@@ -85,6 +86,7 @@ define
    end
 
    proc {NotifyMapChanged}
+      {Map.draw}
       {Map.redraw NPCs PC}
    end
 
@@ -94,13 +96,12 @@ define
       fun {IsPosFreeRec Pos Trainers}
          case Trainers
          of H|T then
-            local P D in
-            {Utils.printf Trainers}
+            local P in
             {Send H get(pos ret(P))}
+
             if P == Pos then
                false
             else
-               {Utils.printf "t"}
                {IsPosFreeRec Pos T}
             end end
          [] nil then
@@ -108,7 +109,7 @@ define
          end
       end
    in
-      {IsPosFreeRec Pos PC|NPCs}
+      {IsPosFreeRec Pos NPCs}
    end
 
 end
