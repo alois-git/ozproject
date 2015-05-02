@@ -45,6 +45,7 @@ define
    proc {StartGameServer MapLayout NPCsP PCP TicTime WildProba}
       GameState = {NewGameState}
       thread {Tic NPCs TicTime} end
+      thread {Tic PC TicTime} end
       {Map.setupMap MapLayout PCP}
       {BattleUtils.setupBattle WildProba}
       {Send GameState run}
@@ -68,6 +69,7 @@ define
    end
 
    proc {Tic NPCs Time}
+     {Utils.printf "tick"}
       R in
       {Delay Time}
       {SendPlayersNotification move(Time) NPCs}

@@ -2,7 +2,6 @@ functor
 import
   QTk at 'x-oz://system/wp/QTk.ozf'
   OS
-  Utils
 export
    SetupMap
    Redraw
@@ -10,7 +9,6 @@ export
    GetJayPosition
    GetPositionsAround
    AddMsgConsole
-   PickPokemoz
 define
    Layout
    Width
@@ -31,11 +29,10 @@ define
    WidthCell
    HeightCell
    HeightText
-   ConsolePort
 
    proc {SetupMap MapLayout PCP}
 
-      local CD F G W in
+      local CD in
       CD = {OS.getCWD}
 
       %% Load textures
@@ -139,8 +136,7 @@ define
       case NPCs of nil then
         skip
       [] H|T then
-         Dir in
-   {DrawTrainer H}
+         {DrawTrainer H}
          {DrawNPCs T}
       end
    end
@@ -203,22 +199,6 @@ define
             [] 3 then center
             end
          end
-   end
-
-   fun {PickPokemoz}
-     local G W F ImgF ImgG ImgW CD
-        CD = {OS.getCWD}
-        ImgG = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
-        ImgF = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
-        ImgW = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
-        Desc=lr(label(init: "Pick the type of your pokemon")
-                button(image:ImgG return:G action:toplevel#close)
-                button(image:ImgW return:W action:toplevel#close)
-                button(image:ImgF return:F action:toplevel#close))
-     in
-        {{QTk.build Desc} show}
-        if G then grass elseif W then water elseif F then fire end
-     end
    end
 
    fun {GetJayPosition}

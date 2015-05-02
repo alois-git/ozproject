@@ -1,11 +1,7 @@
 functor
 import
    Utils
-   OS
-   GameServer
-   Map
    Trainer
-   Pokemoz
 
 export
    NewTrainerManual
@@ -13,15 +9,12 @@ export
 define
 
    fun {NewTrainerManual Pokemoz Position Direction } % could add an icon ?
-      %% This object represent an NPC trainer
+      %% This object represent an player trainer
       %% The position and Direction arguments are initial
       %%    Position = pos(x:X y:Y)
       %%    Direction = up, down, left, right
-      %% The move argument indicate wheter the NPC should move when he receive a move message
-      %% The range argument indicate how far the npc can see the player
       %% Available messages :
-      %%    move -- trigger a movement (move forward or turn)
-      %%    look -- make the NPC search the player
+      %%    guimove(NewDirection) -- trigger a movement form the gui (move forward or turn)
       %%    fight(POKEMOZ) -- see Trainer
       %%    haslost(ret(R)) -- see Trainer
       %%
@@ -31,12 +24,8 @@ define
       InitTrainerManual = npc(super:Super)
 
       fun {FunTrainerManual S Msg}
-         R NewPos
-      in
          case Msg
-         of move then
-            S % the move will be reflected in super, so the npc state hasns't changed
-         [] guimove(NewDirection) then
+         of guimove(NewDirection) then
             if NewDirection == Direction then
                {Send S.super move}
             else
@@ -51,32 +40,5 @@ define
 
    in
       {Utils.newPortObject InitTrainerManual FunTrainerManual}
-   end
-
-
-
-
-   fun {SearchForPlayer Pos Dir Range}
-      if Range =< 0 then false
-      else
-         NewPos PCpos in
-         NewPos = {Map.calculateNewPos Pos Dir}
-         {Send GameServer.pC get(pos ret(PCpos))}
-         if NewPos == PCpos then true
-         elseif {GameServer.isFree Pos} == false then false
-         else {SearchForPlayer NewPos Dir Range-1}
-         end
-      end
-   end
-
-   proc {MoveToPlayer Pos Dir Trainer}
-      NewPos
-   in
-      %% This function assume that the move is possible. Always call SearchForPlayer first.
-      NewPos = {Map.calculateNewPos Pos Dir}
-      if {GameServer.isFree NewPos} then
-         {Send Trainer move}
-         {MoveToPlayer NewPos Dir Trainer}
-      end
    end
 end

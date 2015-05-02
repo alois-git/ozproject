@@ -5,6 +5,7 @@ import
    Utils
    GameServer
    TrainerManual
+   TrainerAuto
    TrainerNPC
    Map
    Pokemoz
@@ -46,8 +47,14 @@ define
    end
 
    local Player NPCs in
-      {Utils.printf "Init player"}
-      Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Map.pickPokemoz} "Player Pokemoz" 5} pos(x:7 y:7) left}
+
+
+      if {Utils.pickMode} == manual then
+         Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Utils.pickPokemoz} "Player Pokemoz" 5} pos(x:7 y:7) left}
+      else
+         Player = {TrainerAuto.newTrainerAuto {Pokemoz.newPokemoz water "Auto Player Pokemoz" 5} pos(x:7 y:7) left}
+      end
+
       NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 0}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left yes 2}|nil
 
       {Utils.printf "Init game"}
