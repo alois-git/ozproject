@@ -12,7 +12,7 @@ export
 
 define
 
-   fun {NewTrainerManual Position Direction Pokemoz} % could add an icon ?
+   fun {NewTrainerManual Pokemoz Position Direction } % could add an icon ?
       %% This object represent an NPC trainer
       %% The position and Direction arguments are initial
       %%    Position = pos(x:X y:Y)
@@ -27,7 +27,7 @@ define
       %%
       %% This object can trigger a battle with the NPC without it's consent (via BattleUtils)
 
-      Super = {Trainer.newTrainer Position Direction Pokemoz}
+      Super = {Trainer.newTrainer Pokemoz Position Direction}
       InitTrainerManual = npc(super:Super)
 
       fun {FunTrainerManual S Msg}

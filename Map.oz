@@ -145,20 +145,27 @@ define
       end
    end
 
-   proc {UpdatePlayerInfo Player}
+   proc {UpdatePlayerInfo Trainer}
       local P in
-   {Send Player.port getpokemoz(P)}
-   {UpdatePlayerPokemozInfo P none}
+        {Send Trainer get(pkmz ret(P))}
+        {UpdatePlayerPokemozInfo P}
       end
    end
 
-   proc {UpdatePlayerPokemozInfo P R}
+   proc {UpdatePlayerPokemozInfo P}
+      Name HP XP LVL HPMax Type in
+      {Send P get(name ret(Name))}
+      {Send P get(hp ret(HP))}
+      {Send P get(xp ret(XP))}
+      {Send P get(lx ret(LVL))}
+      {Send P get(type ret(Type))}
+      {Send P get(hpmax ret(HPMax))}
       {TextCanvas create(rect 0 0 WidthCell*Width HeightCell*2 fill:gray outline:gray)}
-      {DrawText "Pokemon:\t"#P.name p(x:4 y:2)}
-      {DrawText "HP:\t"#P.hp p(x:4 y:3)}
-      {DrawText "XP:\t"#P.xp p(x:4 y:4)}
-      {DrawText "Level:\t"#P.lvl p(x:4 y:5)}
-      {DrawText "Type:\t"#P.type p(x:4 y:6)}
+      {DrawText "Pokemon:\t"#Name p(x:4 y:2)}
+      {DrawText "HP:\t"#HP#"/"#HPMax p(x:4 y:3)}
+      {DrawText "XP:\t"#XP p(x:4 y:4)}
+      {DrawText "Level:\t"#LVL p(x:4 y:5)}
+      {DrawText "Type:\t"#Type p(x:4 y:6)}
    end
 
    proc {AddMsgConsole Msg}
@@ -182,6 +189,7 @@ define
    proc {Redraw NPCs PC}
       {DrawTrainer PC}
       {DrawNPCs NPCs}
+      {UpdatePlayerInfo PC}
    end
 
    fun {GetTerrain X Y}
@@ -200,8 +208,8 @@ define
    fun {PickPokemoz}
      local G W F ImgF ImgG ImgW CD
         CD = {OS.getCWD}
-        ImgF = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
-        ImgG = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
+        ImgG = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
+        ImgF = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
         ImgW = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
         Desc=lr(label(init: "Pick the type of your pokemon")
                 button(image:ImgG return:G action:toplevel#close)

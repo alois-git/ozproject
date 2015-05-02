@@ -7,6 +7,7 @@ import
    TrainerManual
    TrainerNPC
    Map
+   Pokemoz
 define
    %% Default values
    MAP = map
@@ -46,8 +47,8 @@ define
 
    local Player NPCs in
       {Utils.printf "Init player"}
-      Player = {TrainerManual.newTrainerManual {Map.pickPokemoz} pos(x:7 y:7) left}
-      NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 0}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left false 0}|nil
+      Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Map.pickPokemoz} "Player Pokemoz" 5} pos(x:7 y:7) left}
+      NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 0}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left yes 2}|nil
 
       {Utils.printf "Init game"}
       {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability}
