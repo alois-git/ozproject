@@ -31,36 +31,35 @@ define
               help(single char:&h default:false)
               )}
 
-   %% Show help
-      if Args.help then
-	 {Utils.printf "Usage: "#{Property.get 'application.url'}#" [option]"}
-	 {Utils.printf "Options:"}
-	 {Utils.printf "  -m, --map FILE\tFile containing the map (default "#MAP#")"}
-	 {Utils.printf "  -p, --pokemoz \t Number of pokemon you can have"}
-	 {Utils.printf "  -s, --speed \t Speed of the trainer [0,10]"}
-	 {Utils.printf "  -w, --wildprobability \t Probability of wild pokemon in grass"}
-	 {Utils.printf "  -r, --runwayprobability \t Probability of run away from a wild pokemon in grass"}
-	 {Utils.printf "  -a, --autofight \t 0 always run away / 1 always fight / 2 ask"}
-	 {Utils.printf "  -h, --help \t This help"}
-	 {Utils.printf "Example :"}
-	 {Application.exit 0}
-      end
-      
-      local Player NPCs in
-	 %{Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
-	 {Utils.printf "load map file"}
-	 %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
-         {Map.setupMap default}
-	 {Utils.printf "Init player"}
-
-         Player = {TrainerManual.newTrainerManual {Gui.pickpokemoz} pos(x:7 y:7) left}
-         NPCs = {TrainerNPC.newTrainerNPC  pos(x1 y:7) left false 0}|nil
-
-	 {Utils.printf "Init game"}
-	 {GameServer.startGameServer Map.layout NPCs Player Delay}
-
-      end
-
-      {Utils.printf "Leaving app"}
+   if Args.help then
+      {Utils.printf "Usage: "#{Property.get 'application.url'}#" [option]"}
+      {Utils.printf "Options:"}
+      {Utils.printf "  -m, --map FILE\tFile containing the map (default "#MAP#")"}
+      {Utils.printf "  -p, --pokemoz \t Number of pokemon you can have"}
+      {Utils.printf "  -s, --speed \t Speed of the trainer [0,10]"}
+      {Utils.printf "  -w, --wildprobability \t Probability of wild pokemon in grass"}
+      {Utils.printf "  -r, --runwayprobability \t Probability of run away from a wild pokemon in grass"}
+      {Utils.printf "  -a, --autofight \t 0 always run away / 1 always fight / 2 ask"}
+      {Utils.printf "  -h, --help \t This help"}
+      {Utils.printf "Example :"}
       {Application.exit 0}
+   end
+      
+   local Player NPCs in
+      %{Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
+      {Utils.printf "load map file"}
+      %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
+      {Map.setupMap default}
+      {Utils.printf "Init player"}
+
+      Player = {TrainerManual.newTrainerManual {Gui.pickpokemoz} pos(x:7 y:7) left}
+      NPCs = {TrainerNPC.newTrainerNPC  pos(x1 y:7) left false 0}|nil
+
+      {Utils.printf "Init game"}
+      {GameServer.startGameServer Map.layout NPCs Player Delay}
+
+   end
+
+   {Utils.printf "Leaving app"}
+   {Application.exit 0}
 end

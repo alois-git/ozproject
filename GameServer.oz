@@ -2,6 +2,7 @@ functor
 import
    Utils
    Map
+   BattleUtils
 
 export
    StartGameServer
@@ -41,10 +42,11 @@ define
       {Utils.newPortObject InitGameState FunGameState}
    end
 
-   proc {StartGameServer MapLayout NPCs PC TicTime}
+   proc {StartGameServer MapLayout NPCs PC TicTime WildProba}
       GameState = {NewGameState}
       thread {Tic NPCs TicTime} end
       {Map.setupMap MapLayout}
+      {BattleUtils.setupBattle WildProba}
       {Send GameState run}
    end
 
@@ -64,11 +66,8 @@ define
    proc {Tic NPCs Time}
       R in
       {Delay Time}
-      {Send GameState get(ret(R))}
-      if R == running then 
-         {SendPlayersNotification move NPCs} 
-         {SendPlayersNotification look NPCs} 
-      end
+      {SendPlayersNotification move(Time) NPCs} 
+      {SendPlayersNotification look NPCs} 
       {Tic NPCs Time}
    end
 

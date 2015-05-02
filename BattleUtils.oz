@@ -27,85 +27,58 @@ define
    end
 
    proc {BattleTrainer NPC Player}
-
-      proc {BattleTrainerPlayerTurn NPC Player}
-         %% TODO Gui
-         PA PE V in
-         {Send Player get(pkmz ret(PA))}
-         {Send NPC get(pkmz ret(PE))}
-         {Send Player fight(PE)}
-         {Send NPC haslost(ret(V))}
-         if V then
-            Exp in
-            {Send PE get(lx ret(Exp))}
-            {Send PA addxp(Exp)}
-            %% TODO Close Gui ?
-            {Send GameServer.gameState run}
-         else
-            {BattleTrainerNPCTurn NPC Player}
-         end
-      end
-
-      proc {BattleTrainerNPCTurn NPC Player}
-         %% TODO Gui
-         PA V in
-         {Send Player get(pkmz ret(PA))}
-         {Send NPC fight(PA)}
-         {Send Player haslost(ret(V))}
-         if V then
-            {GameServer.stopGameServer defeat}
-            %% TODO Close Gui ?
-         else
-            {BattleTrainerPlayerTurn NPC Player}
-         end
-      end
-      Ack
-   in
-      {Send GameServer.gameState wait(Ack)}
-      {Wait Ack}
-      {BattleTrainerPlayerTurn NPC Player}
+      Enemy Ally in
+      {Send NPC get(pkmz ret(Enemy))}
+      {Send Player get(pkmz ret(Ally))}
+      {Wait Enemy}
+      {Wait Ally}
+      {Battle Enemy Ally}
    end
 
 
-   proc {BattleWild Pokemoz Player}
-
-      proc {BattleWildPlayerTurn Pokemoz Player}
-         %% TODO Gui
-         PA V in
-         {Send Player get(pkmz ret(PA))}
-         {Send Player fight(Pokemoz)}
-         {Send Pokemoz isko(ret(V))}
-         if V then
-            Exp in
-            {Send Pokemoz get(lx ret(Exp))}
-            {Send PA addxp(Exp)}
-            %% TODO Close Gui ?
-            {Send GameServer.gameState run}
-         else
-            {BattleWildPkmzTurn Pokemoz Player}
-         end
-      end
-
-      proc {BattleWildPkmzTurn Pokemoz Player}
-         %% TODO Gui
-         PA V in
-         {Send Player get(pkmz ret(PA))}
-         {Send  Pokemoz attackedby(PA)}
-         {Send Player haslost(ret(V))}
-         if V then
-            {GameServer.stopGameServer defeat}
-            %% TODO Close Gui ?
-         else
-            {BattleWildPlayerTurn Pokemoz Player}
-         end
-      end
-      Ack
-   in
-      {Send GameServer.gameState wait(Ack)}
-      {Wait Ack}
-      {BattleWildPlayerTurn Pokemoz Player}
+   proc {BattleWild Wild Player}
+      Pkmz in
+      {Send Player get(pkmz ret(Pkmz))}
+      {Wait Pkmz}
+      {BattleWild Pkmz}
    end
       
+   proc {Battle Enemy Ally}
+
+      proc {BattleEnemyTurn Enemy Ally Display}
+         V in
+         {Send Enemy attackedby(Ally)}
+         % TODO Display.h1.update ( Enemy.getHealth )
+         {Send Enemy isko(ret(V))}
+         if V then
+            Exp in
+            {Send Enemy get(lx ret(Exp))}
+            {Send Ally addxp(Exp)}
+            {Send GameServer.gameState run}
+         else
+            {BattleAllyTurn Ally Display}
+         end
+      end
+
+      proc {BattleAllyTurn Enemy Ally Display}
+         V in
+         {Send Ally attackdby(Enemy)}
+         % TODO Display.h2.update ( Ally.getHealth )
+         {Send Ally isko(ret(V))}
+         if V then
+            {GameServer.stopGameServer defeat}
+         else
+            {BattleEnemyTurn Enemy Ally Display}
+         end
+      end
+      Ack
+      Display
+   in
+      {Send GameServer.gameState wait(Ack)}
+      {Wait Ack}
+      Display = {DrawBattleGui Enemy Ally}
+      {BattleAllyTurn Enemy Ally Display}
+   end
 
    proc {WalkInGrass Player}
       R in
@@ -116,7 +89,7 @@ define
    end
 
 
-   proc {DrawBattleUI Pkmz1 Pkmz2}
+   fun {DrawBattleUI Pkmz1 Pkmz2}
       H1 H2 L1 L2 T1 T2 in
       {{QTk.build lr(
                   canvas(  width:900
@@ -138,6 +111,8 @@ define
       
       {Screen create(text 750 0 anchor:nw text:H2)}
       {Screen create(text 750 200 anchor:nw text:L2)}
+
+      Display = text(h1:H1 h2:H2)
 
    end
 
