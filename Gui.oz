@@ -202,7 +202,7 @@ define
       Desc=td(
 	      lr(canvas(bg:gray
 			width:MapWidth
-			height:HeightCell*2
+			height:80
 			handle:TextCanvas))
 	      lr(canvas(bg:gray
 			width:MapWidth
@@ -210,7 +210,7 @@ define
 			handle:Grid)
 	        listbox(bg:white
 		       width:50
-		       height:17
+		       height:16
 		       tdscrollbar:true
 		       handle:Console
                        pady: 2

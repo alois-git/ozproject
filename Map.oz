@@ -1,5 +1,7 @@
 functor
 import
+  QTk at 'x-oz://system/wp/QTk.ozf'
+  OS
   Utils
 export
    SetupMap
@@ -7,12 +9,48 @@ export
    GetTerrain
    GetJayPosition
    GetPositionsAround
+   AddMsgConsole
 define
    Layout
    Width
    Height
+   Grass
+   Path
+   Jay
+   Center
+   TrainerUp
+   TrainerDown
+   TrainerLeft
+   TrainerRight
+   MapTextures
+   Window
+   Grid
+   Console
+   TextCanvas
+   WidthCell 
+   HeightCell
+   HeightText
 
    proc {SetupMap MapLayout}
+      local CD in
+      CD = {OS.getCWD}
+      %% Load textures
+      Grass = {QTk.newImage photo(file:CD#'/images/grass.gif')}        
+      Path = {QTk.newImage photo(file:CD#'/images/path.gif')}
+      Center = {QTk.newImage photo(file:CD#'/images/path.gif')}
+      Jay = {QTk.newImage photo(file:CD#'/images/path.gif')}
+ 
+      TrainerUp = {QTk.newImage photo(file:CD#'/images/trainerUp.gif')}   
+      TrainerDown = {QTk.newImage photo(file:CD#'/images/trainerDown.gif')}   
+      TrainerLeft = {QTk.newImage photo(file:CD#'/images/trainerLeft.gif')}   
+      TrainerRight = {QTk.newImage photo(file:CD#'/images/trainerRight.gif')}
+      end   
+      MapTextures = maptextures(Path Grass Jay Center)
+
+      WidthCell = 40
+      HeightCell = 40
+      HeightText = 10
+
       %% Setup the map.
       %% MapLayout must be of layout(map:map(r(...) [r(...)]) width:W height:H)
       %%    or default
@@ -34,15 +72,114 @@ define
          Width = MapLayout.width
          Height = MapLayout.height
       end
+      {InitWindow}
       {Draw}
    end
 
+   proc {InitWindow}
+      local MapWidth MapHeight Desc in
+      MapWidth = WidthCell * Width
+      MapHeight = HeightCell * Height
+
+      Desc=td(lr(canvas(bg:gray
+			width:MapWidth
+			height:80
+			handle:TextCanvas))
+	         lr(canvas(bg:gray
+			width:MapWidth
+			height:MapHeight
+			handle:Grid)
+	         listbox(bg:white
+		       width:50
+		       height:17
+		       tdscrollbar:true
+		       handle:Console
+                       pady: 2)))
+
+      Window={QTk.build Desc}
+      {Window show}
+      %{Window bind(event:"<Up>" action:proc{$} {Send Trainer move(up)} end)}
+      %{Window bind(event:"<Left>" action:proc{$} {Send Trainer move(left)} end)}
+      %{Window bind(event:"<Down>" action:proc{$} {Send Trainer move(down)}  end)}
+      %{Window bind(event:"<Right>" action:proc{$} {Send Trainer move(right)} end)}
+      end
+   end
+
+   proc {DrawImageGrid Image X Y}
+      {Grid create(image WidthCell*X-(WidthCell div 2) HeightCell*Y-(HeightCell div 2) image:Image)}
+   end
+
+   proc {DrawText Text Position}
+      {TextCanvas create(text WidthCell*Position.x-(WidthCell) HeightText*Position.y text:Text)}
+   end
+
+   proc {DrawTrainer Trainer}
+      PlayerIcon Position Direction
+   in
+        {Send Trainer get(dir ret(Direction))}
+        case Direction of up then
+	     PlayerIcon = TrainerUp
+        [] down then
+             PlayerIcon = TrainerDown
+        [] right then
+             PlayerIcon = TrainerRight
+        else
+            PlayerIcon = TrainerLeft
+        end
+        {Send Trainer get(pos ret(Position))}
+        {Grid create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:PlayerIcon)}
+   end
+
+   proc {DrawNPCs NPCs}
+      case NPCs of nil then
+        skip
+      [] H|T then
+         Dir in 
+	 {DrawTrainer H}
+         {DrawNPCs T}
+      end
+   end
+
+   proc {UpdatePlayerInfo Player}
+      local P in
+	 {Send Player.port getpokemoz(P)}
+	 {UpdatePlayerPokemozInfo P none}
+      end
+   end
+
+   proc {UpdatePlayerPokemozInfo P R}
+      {TextCanvas create(rect 0 0 WidthCell*Width HeightCell*2 fill:gray outline:gray)}
+      {DrawText "Pokemon:\t"#P.name p(x:4 y:2)}
+      {DrawText "HP:\t"#P.hp p(x:4 y:3)}
+      {DrawText "XP:\t"#P.xp p(x:4 y:4)}
+      {DrawText "Level:\t"#P.lvl p(x:4 y:5)}
+      {DrawText "Type:\t"#P.type p(x:4 y:6)}
+   end
+
+   proc {AddMsgConsole Msg ConsoleIndex}
+      % insert(I LVS): Inserts the list of virtual strings LVS just before the element at position I.
+      {Console insert(ConsoleIndex [Msg])}	
+   end
+
+   proc {DrawMap Map X Y}
+      local TextureNumber in
+	 TextureNumber = Layout.Y.X+1
+	 {DrawImageGrid MapTextures.TextureNumber X Y}
+      end
+   end
+
    proc {Draw}
-      skip
+      % draw the map textures
+      for I in 1..Width do
+	 for J in 1..Height do
+	    {DrawMap Map I J}
+	 end
+      end
    end
 
    proc {Redraw NPCs PC}
-      skip
+      {DrawTrainer PC}
+      {DrawNPCs NPCs}
    end
 
    fun {GetTerrain X Y}

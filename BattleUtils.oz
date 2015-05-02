@@ -39,8 +39,7 @@ define
    proc {BattleWild Wild Player}
       Pkmz in
       {Send Player get(pkmz ret(Pkmz))}
-      {Wait Pkmz}
-      {BattleWild Pkmz}
+      {Battle Wild Pkmz}
    end
       
    proc {Battle Enemy Ally}
@@ -56,7 +55,7 @@ define
             {Send Ally addxp(Exp)}
             {Send GameServer.gameState run}
          else
-            {BattleAllyTurn Ally Display}
+            {BattleAllyTurn Enemy Ally Display}
          end
       end
 
@@ -76,7 +75,7 @@ define
    in
       {Send GameServer.gameState wait(Ack)}
       {Wait Ack}
-      Display = {DrawBattleGui Enemy Ally}
+      Display = {DrawBattleUI Enemy Ally}
       {BattleAllyTurn Enemy Ally Display}
    end
 
@@ -88,9 +87,8 @@ define
       end
    end
 
-
    fun {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 in
+      H1 H2 L1 L2 T1 T2 Display in
       {{QTk.build lr(
                   canvas(  width:900
                            height:900
