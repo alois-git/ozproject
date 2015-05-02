@@ -2,7 +2,6 @@ functor
 import
    Application
    Property
-   Gui
    Utils
    GameServer
    TrainerManual
@@ -11,13 +10,13 @@ import
 define
    %% Default values
    MAP = map
-   WILDPOKEMOZPROBA = 100
+   WILDPOKEMOZPROBA = 50
    NBPOKEMOZ = 1
    DEFAULTSPEED = 9
    DELAY = 200
    RUNAWAYPROBA = 0
    AUTOFIGHT = 2
-   
+
    %% Posible arguments
    Args = {Application.getArgs
            record(
@@ -44,22 +43,16 @@ define
       {Utils.printf "Example :"}
       {Application.exit 0}
    end
-      
-   local Player NPCs in
-      %{Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
-      {Utils.printf "load map file"}
-      %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
-      {Map.setupMap default}
-      {Utils.printf "Init player"}
 
-      Player = {TrainerManual.newTrainerManual {Gui.pickpokemoz} pos(x:7 y:7) left}
-      NPCs = {TrainerNPC.newTrainerNPC  pos(x1 y:7) left false 0}|nil
+   local Player NPCs in
+      {Utils.printf "Init player"}
+      Player = {TrainerManual.newTrainerManual {Map.pickPokemoz} pos(x:7 y:7) left}
+      NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 0}|nil
 
       {Utils.printf "Init game"}
-      {GameServer.startGameServer Map.layout NPCs Player Delay}
+      {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability}
 
    end
 
-   {Utils.printf "Leaving app"}
    {Application.exit 0}
 end

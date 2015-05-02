@@ -27,7 +27,7 @@ define
       %%
       %% This object can trigger a battle with the NPC without it's consent (via BattleUtils)
 
-      Super = {Trainer.newTrainer Pokemoz Position Direction}
+      Super = {Trainer.newTrainer Position Direction Pokemoz}
       InitTrainerManual = npc(super:Super)
 
       fun {FunTrainerManual S Msg}

@@ -42,12 +42,15 @@ define
       {Utils.newPortObject InitGameState FunGameState}
    end
 
-   proc {StartGameServer MapLayout NPCs PC TicTime WildProba}
+   proc {StartGameServer MapLayout NPCsP PCP TicTime WildProba}
       GameState = {NewGameState}
       thread {Tic NPCs TicTime} end
       {Map.setupMap MapLayout}
       {BattleUtils.setupBattle WildProba}
       {Send GameState run}
+      NPCs = NPCsP
+      PC = PCP
+      {NotifyMapChanged}
    end
 
    proc {StopGameServer Status}
@@ -66,8 +69,8 @@ define
    proc {Tic NPCs Time}
       R in
       {Delay Time}
-      {SendPlayersNotification move(Time) NPCs} 
-      {SendPlayersNotification look NPCs} 
+      {SendPlayersNotification move(Time) NPCs}
+      {SendPlayersNotification look NPCs}
       {Tic NPCs Time}
    end
 
@@ -81,6 +84,7 @@ define
    end
 
    proc {NotifyMapChanged}
+      {Utils.printf "redraw npc/pc"}
       {Map.redraw NPCs PC}
    end
 

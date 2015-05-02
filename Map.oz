@@ -10,6 +10,7 @@ export
    GetJayPosition
    GetPositionsAround
    AddMsgConsole
+   PickPokemoz
 define
    Layout
    Width
@@ -27,7 +28,7 @@ define
    Grid
    Console
    TextCanvas
-   WidthCell 
+   WidthCell
    HeightCell
    HeightText
 
@@ -35,16 +36,16 @@ define
       local CD in
       CD = {OS.getCWD}
       %% Load textures
-      Grass = {QTk.newImage photo(file:CD#'/images/grass.gif')}        
+      Grass = {QTk.newImage photo(file:CD#'/images/grass.gif')}
       Path = {QTk.newImage photo(file:CD#'/images/path.gif')}
       Center = {QTk.newImage photo(file:CD#'/images/path.gif')}
       Jay = {QTk.newImage photo(file:CD#'/images/path.gif')}
- 
-      TrainerUp = {QTk.newImage photo(file:CD#'/images/trainerUp.gif')}   
-      TrainerDown = {QTk.newImage photo(file:CD#'/images/trainerDown.gif')}   
-      TrainerLeft = {QTk.newImage photo(file:CD#'/images/trainerLeft.gif')}   
+
+      TrainerUp = {QTk.newImage photo(file:CD#'/images/trainerUp.gif')}
+      TrainerDown = {QTk.newImage photo(file:CD#'/images/trainerDown.gif')}
+      TrainerLeft = {QTk.newImage photo(file:CD#'/images/trainerLeft.gif')}
       TrainerRight = {QTk.newImage photo(file:CD#'/images/trainerRight.gif')}
-      end   
+      end
       MapTextures = maptextures(Path Grass Jay Center)
 
       WidthCell = 40
@@ -82,18 +83,18 @@ define
       MapHeight = HeightCell * Height
 
       Desc=td(lr(canvas(bg:gray
-			width:MapWidth
-			height:80
-			handle:TextCanvas))
-	         lr(canvas(bg:gray
-			width:MapWidth
-			height:MapHeight
-			handle:Grid)
-	         listbox(bg:white
-		       width:50
-		       height:17
-		       tdscrollbar:true
-		       handle:Console
+      width:MapWidth
+      height:80
+      handle:TextCanvas))
+           lr(canvas(bg:gray
+      width:MapWidth
+      height:MapHeight
+      handle:Grid)
+           listbox(bg:white
+           width:50
+           height:17
+           tdscrollbar:true
+           handle:Console
                        pady: 2)))
 
       Window={QTk.build Desc}
@@ -116,34 +117,34 @@ define
    proc {DrawTrainer Trainer}
       PlayerIcon Position Direction
    in
-        {Send Trainer get(dir ret(Direction))}
-        case Direction of up then
-	     PlayerIcon = TrainerUp
-        [] down then
+      {Send Trainer get(dir ret(Direction))}
+      case Direction of up then
+        PlayerIcon = TrainerUp
+      [] down then
              PlayerIcon = TrainerDown
-        [] right then
+      [] right then
              PlayerIcon = TrainerRight
-        else
+      else
             PlayerIcon = TrainerLeft
-        end
-        {Send Trainer get(pos ret(Position))}
-        {Grid create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:PlayerIcon)}
+      end
+      {Send Trainer get(pos ret(Position))}
+      {Grid create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:PlayerIcon)}
    end
 
    proc {DrawNPCs NPCs}
       case NPCs of nil then
         skip
       [] H|T then
-         Dir in 
-	 {DrawTrainer H}
+         Dir in
+   {DrawTrainer H}
          {DrawNPCs T}
       end
    end
 
    proc {UpdatePlayerInfo Player}
       local P in
-	 {Send Player.port getpokemoz(P)}
-	 {UpdatePlayerPokemozInfo P none}
+   {Send Player.port getpokemoz(P)}
+   {UpdatePlayerPokemozInfo P none}
       end
    end
 
@@ -158,22 +159,18 @@ define
 
    proc {AddMsgConsole Msg ConsoleIndex}
       % insert(I LVS): Inserts the list of virtual strings LVS just before the element at position I.
-      {Console insert(ConsoleIndex [Msg])}	
-   end
-
-   proc {DrawMap Map X Y}
-      local TextureNumber in
-	 TextureNumber = Layout.Y.X+1
-	 {DrawImageGrid MapTextures.TextureNumber X Y}
-      end
+      {Console insert(ConsoleIndex [Msg])}
    end
 
    proc {Draw}
       % draw the map textures
       for I in 1..Width do
-	 for J in 1..Height do
-	    {DrawMap Map I J}
-	 end
+        for J in 1..Height do
+          local TextureNumber in
+            TextureNumber = Layout.J.I+1
+            {DrawImageGrid MapTextures.TextureNumber I J}
+          end
+        end
       end
    end
 
@@ -195,6 +192,18 @@ define
          end
    end
 
+   fun {PickPokemoz}
+     local G W F
+        Desc=lr(label(init: "Pick the type of your pokemon")
+                button(text:"Grass" return:G action:toplevel#close)
+                button(text:"Water" return:W action:toplevel#close)
+                button(text:"Fire" return:F action:toplevel#close))
+     in
+        {{QTk.build Desc} show}
+        if G then grass elseif W then water elseif F then fire end
+     end
+   end
+
    fun {GetJayPosition}
       {GetJayPositionRec 1 1}
    end
@@ -212,16 +221,16 @@ define
        {GetJayPositionRec X+1 Y}
      end
    end
-   
+
    fun {CalculateNewPos P MoveType}
       case MoveType of up then
-	 p(x:P.x y:P.y-1)
+   p(x:P.x y:P.y-1)
       [] down then
-	 p(x:P.x y:P.y+1)
+   p(x:P.x y:P.y+1)
       [] left then
-	 p(x:P.x-1 y:P.y)
+   p(x:P.x-1 y:P.y)
       [] right then
-	 p(x:P.x+1 y:P.y)
+   p(x:P.x+1 y:P.y)
       end
    end
 

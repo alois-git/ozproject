@@ -7,7 +7,7 @@ export
    NewTrainer
 
 define
-   
+
    fun {NewTrainer Pokemoz Pos Direction}
       %% This object represent a trainer (any trainer)
       %% Available messages :
@@ -26,11 +26,12 @@ define
 
       fun {FunTrainer S Msg}
          case Msg
-         of move then   
-            NewPos GameState in    
+         of move then
+            NewPos GameState in
             {Send GameServer.gameState get(ret(GameState))}
             NewPos = {Map.calculateNewPos S.pos S.dir}
             if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isFree NewPos} then
+              {GameServer.notifyMapChanged}
               case S.dir
                 of up    then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y-1)) dir:S.dir)
                 [] down  then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y+1)) dir:S.dir)
@@ -38,8 +39,9 @@ define
                 [] right then trainer(pkmz:S.pkmz pos:pos(x:(S.pos.x+1) y:S.pos.y) dir:S.dir)
               end
             end
-            
+
          [] turn(D) then
+            {GameServer.notifyMapChanged}
             trainer(pkmz:S.pkmz pos:S.pos dir:D)
          [] fight(P) then
             {Send P attackedby(S.pkmz)}
