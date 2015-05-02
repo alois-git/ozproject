@@ -85,7 +85,7 @@ define
          NewPos = {Map.calculateNewPos Pos Dir}
          {Send GameServer.pC get(pos ret(PCpos))}
          if NewPos == PCpos then true
-         elseif {GameServer.isFree Pos} == false then false
+         elseif {GameServer.isPosFree Pos} == false then false
          else {SearchForPlayer NewPos Dir Range-1}
          end
       end
@@ -96,7 +96,7 @@ define
    in
       %% This function assume that the move is possible. Always call SearchForPlayer first.
       NewPos = {Map.calculateNewPos Pos Dir}
-      if {GameServer.isFree NewPos} then
+      if {GameServer.isPosFree NewPos} then
          {Send Trainer move}
          {MoveToPlayer NewPos Dir Trainer}
       end

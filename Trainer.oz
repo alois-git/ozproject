@@ -30,7 +30,7 @@ define
             NewPos GameState in
             {Send GameServer.gameState get(ret(GameState))}
             NewPos = {Map.calculateNewPos S.pos S.dir}
-            if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isFree NewPos} then
+            if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
               {GameServer.notifyMapChanged}
               case S.dir
                 of up    then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y-1)) dir:S.dir)

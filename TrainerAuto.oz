@@ -25,15 +25,18 @@ define
       %%       and RETURN is an unbound variable
 
       Super = {Trainer.newTrainer Pokemoz Position Direction}
-      InitTrainerAuto = npc(super:Super)
+      InitTrainerAuto = pc(super:Super)
 
       fun {FunTrainerAuto S Msg}
         R NewPos in
          case Msg of move(Time) then
-            NewMove in
-            NewMove = {GetNextMove Position Map.getJayPosition}
             {Utils.printf "move !"}
-            {Utils.printf NewMove}
+            NewMove Position in
+	    {Send S.super get(pos ret(Position))}
+            {Utils.printf "got pos"}
+            NewMove = {GetNextMove Position {Map.getJayPosition}}
+            
+            {Utils.printf "got next move"}
             if NewMove == Direction then
                {Send S.super move}
             else
@@ -60,9 +63,9 @@ define
            NewPosition = {Utils.calculateNewPos Position Utils.moveType.MoveIndex}
            NewManathanDistance = {Abs (JayPosition.x - NewPosition.x)} + {Abs (JayPosition.y - NewPosition.y)}
            NumberOfTrainerAround = {GetNumberTrainerNPCAround {Map.getPositionsAround NewPosition}}
-           TerrainType = Map.getTerrain(NewPosition)
+           TerrainType = {Map.getTerrain NewPosition.x NewPosition.y}
            NewWeight = NewManathanDistance + NumberOfTrainerAround + TerrainType
-
+           {Utils.printf MoveIndex}
            if MoveIndex > 4 then
              SelectedMove
            elseif NewWeight < Weight then
@@ -74,13 +77,14 @@ define
          end
         end
       in
+    
        {GetNextMoveRec Position JayPosition 0 1 none}
       end
 
 
       % maybe move that to trainer class and get it with a port message
       fun {GetNumberTrainerNPCAround Positions}
-        fun {GetNumberTrainerNPCAroundRec Position A}
+        fun {GetNumberTrainerNPCAroundRec Positions A}
           case Positions of H|T then
              if {GameServer.isPosFree H} == false then
               {GetNumberTrainerNPCAroundRec T A+1}

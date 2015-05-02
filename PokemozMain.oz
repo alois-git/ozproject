@@ -18,6 +18,7 @@ define
    DELAY = 200
    RUNAWAYPROBA = 0
    AUTOFIGHT = 2
+   A
 
    %% Posible arguments
    Args = {Application.getArgs
@@ -55,12 +56,13 @@ define
          Player = {TrainerAuto.newTrainerAuto {Pokemoz.newPokemoz water "Auto Player Pokemoz" 5} pos(x:7 y:7) left}
       end
 
-      NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 0}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left yes 2}|nil
+      NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 0}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 2}|nil
 
       {Utils.printf "Init game"}
       {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability}
 
    end
-
+   {Wait A}
+   {Utils.printf "exit game"}
    {Application.exit 0}
 end

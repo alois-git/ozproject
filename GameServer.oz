@@ -33,7 +33,7 @@ define
          else
             case Msg
             of run then running
-            [] wait(Ack) then Ack=unit waiting
+            [] wait(Ack) then Ack=unit waiting 
             [] get(ret(R)) then R=S S
             end
          end
@@ -44,13 +44,13 @@ define
 
    proc {StartGameServer MapLayout NPCsP PCP TicTime WildProba}
       GameState = {NewGameState}
+      NPCs = NPCsP
+      PC = PCP
       thread {Tic NPCs TicTime} end
-      thread {Tic PC TicTime} end
+      thread {Tic PC|nil TicTime} end
       {Map.setupMap MapLayout PCP}
       {BattleUtils.setupBattle WildProba}
       {Send GameState run}
-      NPCs = NPCsP
-      PC = PCP
       {NotifyMapChanged}
       {Map.addMsgConsole "Welcome to pokemoz !"}
    end
@@ -69,8 +69,6 @@ define
    end
 
    proc {Tic NPCs Time}
-     {Utils.printf "tick"}
-      R in
       {Delay Time}
       {SendPlayersNotification move(Time) NPCs}
       {SendPlayersNotification look NPCs}
@@ -96,11 +94,13 @@ define
       fun {IsPosFreeRec Pos Trainers}
          case Trainers
          of H|T then
-            local R in
-            {Send H get(position ret(R))}
-            if R == Pos then
+            local P D in
+            {Utils.printf Trainers}
+            {Send H get(pos ret(P))}
+            if P == Pos then
                false
             else
+               {Utils.printf "t"}
                {IsPosFreeRec Pos T}
             end end
          [] nil then

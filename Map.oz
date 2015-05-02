@@ -9,6 +9,7 @@ export
    GetJayPosition
    GetPositionsAround
    AddMsgConsole
+   CalculateNewPos
 define
    Layout
    Width
@@ -237,7 +238,7 @@ define
          Down = {CalculateNewPos Position down}
          Left = {CalculateNewPos Position left}
          Right  = {CalculateNewPos Position right}
-         [Up Down Left Right]
+         Up|Down|Left|Right|nil
       end
    end
 
