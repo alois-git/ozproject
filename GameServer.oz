@@ -70,10 +70,15 @@ define
       if Status == victory then
          {Utils.printf "Congratulations, you have won the game."}
          {Utils.printf "Jay would be so proud of you."}
+         {Map.addMsgConsole "Congratulations, you have won the game."}
+         {Map.addMsgConsole "Jay would be so proud of you."}
       else
          {Utils.printf "Doom doom doom..."}
          {Utils.printf "You have lost the game."}
          {Utils.printf "You must play more to be the very best !"}
+         {Map.addMsgConsole "Doom doom doom..."}
+         {Map.addMsgConsole "You have lost the game."}
+         {Map.addMsgConsole "You must play more to be the very best !"}
       end
       PokemozMain.finish = unit
    end
@@ -140,7 +145,7 @@ define
             true
          end
       end
-      TakePositions
+      TakenPositions
    in
       {Send GameState get(posTaken ret(TakenPositions))}
       {IsPosFreeRec Pos TakenPositions}

@@ -6,6 +6,7 @@ import
    Map
    Trainer
    Pokemoz
+   BattleUtils
 export
    NewTrainerAuto
 define
@@ -49,6 +50,8 @@ define
                      P in
                      {Send S.super get(pkmz ret(P))}
                      {Send P heal}
+                  elseif {Map.getTerrain NewPos.x NewPos.y} == grass then
+                     {BattleUtils.walkInGrass GameServer.pC}
                   end
                end
             else
