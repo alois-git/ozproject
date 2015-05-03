@@ -21,26 +21,46 @@ define
       %% This object can trigger a battle with the NPC without it's consent (via BattleUtils)
 
       Super = {Trainer.newTrainer Pokemoz Position Direction}
-      InitTrainerManual = npc(super:Super)
+      InitTrainerManual = pc(state:waiting super:Super)
 
       fun {FunTrainerManual S Msg}
-         case Msg
-         of guimove(NewDirection) then
-            Position NewPos GameState in
-            if NewDirection == Direction then
-               {Send GameServer.gameState get(ret(GameState))}
-               NewPos = {Map.calculateNewPos Position NewDirection}
-               if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
-                 {Send S.super move}
-               end
+         NewPos in
+         case S of pc(state:waiting super:_) then
+            case Msg of move(Time) then
+              {Utils.printf "play"}
+              pc(state:playing super:S.super)
             else
-               {Send S.super turn(NewDirection)}
+            {Utils.printf "unknow"}
+              pc(state:waiting super:S.super)
             end
-            S
-         else
-            {Send S.super Msg}
-            S
-         end
+         [] pc(state:playing super:_) then
+          case Msg
+            of guimove(NewDirection) then
+              local P D CurrentGameState Dir in
+              {Send S.super get(pos ret(P))}
+              {Send S.super get(dir ret(D))}
+              if NewDirection == D then
+                {Send GameServer.gameState get(ret(CurrentGameState))}
+                {Utils.printf D}
+                NewPos = {Map.calculateNewPos P D}
+                {Utils.printf NewPos}
+                %{Utils.printf {GameServer.isPosFree NewPos}}
+                %andthen {GameServer.isPosFree NewPos}
+                if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none  then
+                  {Send S.super move}
+                end
+              else
+                {Send S.super turn(NewDirection)}
+              end
+              pc(state:waiting super:S.super)
+              end
+          [] move(Time) then
+             S
+          else
+              {Send S.super Msg}
+              S
+          end
+        end
       end
 
    in
