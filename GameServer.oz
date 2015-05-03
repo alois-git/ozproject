@@ -3,6 +3,8 @@ import
    Utils
    Map
    BattleUtils
+   PokemozMain
+   Application
 
 export
    StartGameServer
@@ -34,6 +36,7 @@ define
             case Msg
             of run then running
             [] wait(Ack) then Ack=unit waiting
+            [] finish then finished
             [] get(ret(R)) then R=S S
             end
          end
@@ -57,7 +60,7 @@ define
    proc {StopGameServer Status}
       %% This proc stops the server and display the victory / defeat notification
       {Send GameState finish}
-      if status == victory then
+      if Status == victory then
          {Utils.printf "Congratulations, you have won the game."}
          {Utils.printf "Jay would be so proud of you."}
       else
@@ -65,6 +68,7 @@ define
          {Utils.printf "You have lost the game."}
          {Utils.printf "You must play more to be the very best !"}
       end
+      PokemozMain.finish = unit
    end
 
    proc {Tic NPCs PC Time}

@@ -35,25 +35,36 @@ define
               pc(state:waiting super:S.super)
             end
          [] pc(state:playing super:_) then
-          case Msg
+            case Msg
             of guimove(NewDirection) then
-              local P D CurrentGameState Dir in
-              {Send S.super get(pos ret(P))}
-              {Send S.super get(dir ret(D))}
-              if NewDirection == D then
-                {Send GameServer.gameState get(ret(CurrentGameState))}
+               local P D CurrentGameState Dir in
+               {Send S.super get(pos ret(P))}
+               {Send S.super get(dir ret(D))}
+               if NewDirection == D then
+                  {Send GameServer.gameState get(ret(CurrentGameState))}
 
-                NewPos = {Map.calculateNewPos P D}
-                %%{Utils.printf {GameServer.isPosFree NewPos}}
-                %%andthen {GameServer.isPosFree NewPos}
-                if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none  then
-                  {Send S.super move}
-                end
-              else
-                {Send S.super turn(NewDirection)}
-              end
-              pc(state:waiting super:S.super)
-              end
+                  NewPos = {Map.calculateNewPos P D}
+                  %%{Utils.printf {GameServer.isPosFree NewPos}}
+                  %%andthen {GameServer.isPosFree NewPos}
+                  if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none  then
+                     {Send S.super move}
+                  end
+                  local Jay Center in
+                     Jay = {Map.getJayPosition}
+                     Center = {Map.getCenterPosition}
+                     if NewPos.x == Jay.x andthen NewPos.y == Jay.y then
+                        {GameServer.stopGameServer victory}
+                     elseif NewPos.x == Center.x andthen NewPos.y == Center.y then
+                        P in
+                        {Send S.super get(pkmz ret(P))}
+                        {Send P heal}
+                     end
+                  end
+               else
+                  {Send S.super turn(NewDirection)}
+               end
+               pc(state:waiting super:S.super)
+            end
           [] move(Time) then
              S
           else
