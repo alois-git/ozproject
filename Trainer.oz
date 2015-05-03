@@ -27,14 +27,18 @@ define
       fun {FunTrainer S Msg}
          case Msg
          of move then
-            thread {GameServer.notifyMapChanged} end
-            % map change requires sending a message so it will wait until pos updated
+            Ack NewPos in
             case S.dir
-              of up    then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y-1)) dir:S.dir)
-              [] down  then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y+1)) dir:S.dir)
-              [] left  then trainer(pkmz:S.pkmz pos:pos(x:(S.pos.x-1) y:S.pos.y) dir:S.dir)
-              [] right then trainer(pkmz:S.pkmz pos:pos(x:(S.pos.x+1) y:S.pos.y) dir:S.dir)
+              of up then NewPos = pos(x:S.pos.x y:(S.pos.y-1))
+              [] down  then NewPos =pos(x:S.pos.x y:(S.pos.y+1))
+              [] left  then NewPos =pos(x:(S.pos.x-1) y:S.pos.y)
+              [] right then NewPos =pos(x:(S.pos.x+1) y:S.pos.y)
             end
+            {Send GameServer.gameState moved(S.pos NewPos Ack)}
+            {Wait Ack}
+            % map change requires sending a message so it will wait until pos updated
+            thread {GameServer.notifyMapChanged} end
+            trainer(pkmz:S.pkmz pos:NewPos dir:S.dir)
          [] turn(D) then
             thread {GameServer.notifyMapChanged} end
             trainer(pkmz:S.pkmz pos:S.pos dir:D)

@@ -28,7 +28,6 @@ define
          NewPos in
          case S of pc(state:waiting super:_) then
             case Msg of move(Time) then
-              {Utils.printf "play"}
               pc(state:playing super:S.super)
             else
               {Send S.super Msg}
@@ -42,9 +41,7 @@ define
               {Send S.super get(dir ret(D))}
               if NewDirection == D then
                 {Send GameServer.gameState get(ret(CurrentGameState))}
-
                 NewPos = {Map.calculateNewPos P D}
-                %%{Utils.printf {GameServer.isPosFree NewPos}}
                 %%andthen {GameServer.isPosFree NewPos}
                 if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none  then
                   {Send S.super move}

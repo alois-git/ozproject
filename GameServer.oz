@@ -17,7 +17,7 @@ define
    NPCs
    PC
 
-   fun {NewGameState}
+   fun {NewGameState PosTaken}
       %% This object memorize the current state of the game (running, waiting, finished)
       %% Available messages :
       %%    run
@@ -26,15 +26,20 @@ define
       %%    get(ret(RETURN))
       %%       where RETURN is an unbound variable
 
-      InitGameState = waiting
+      InitGameState = game(state:waiting posTaken:PosTaken)
 
       fun {FunGameState S Msg}
-         if S == finished then finished
+         if S.state == finished then game(state:finished posTaken:PosTaken)
          else
             case Msg
-            of run then running
-            [] wait(Ack) then Ack=unit waiting
-            [] get(ret(R)) then R=S S
+            of run then  game(state:running posTaken:S.posTaken)
+            [] wait(Ack) then Ack=unit game(state:waiting posTaken:S.posTaken)
+            [] get(ret(R)) then R=S.state S
+            [] moved(From To Ack) then
+              NewPosTaken in
+              NewPosTaken ={RemovePositionTaken From To|S.posTaken nil}
+              Ack=unit
+              game(state:S.state posTaken:NewPosTaken)
             end
          end
       end
@@ -43,14 +48,16 @@ define
    end
 
    proc {StartGameServer MapLayout NPCsP PCP TicTime WildProba}
-      GameState = {NewGameState}
+      PositionsTaken in
       NPCs = NPCsP
       PC = PCP
-      thread {Tic NPCs PC|nil TicTime} end
+      PositionsTaken = {InitPositionTaken PC|NPCs nil}
+      GameState = {NewGameState PositionsTaken}
       {Map.setupMap MapLayout PCP}
       {BattleUtils.setupBattle WildProba}
       {Send GameState run}
       {NotifyMapChanged}
+      thread {Tic NPCs PC|nil TicTime} end
       {Map.addMsgConsole "Welcome to pokemoz !"}
    end
 
@@ -65,6 +72,29 @@ define
          {Utils.printf "You have lost the game."}
          {Utils.printf "You must play more to be the very best !"}
       end
+   end
+
+   fun {RemovePositionTaken From List NewList}
+     case List of nil then NewList
+     [] H|T then
+        local P in
+          if From.x == H.x andthen From.y == H.y then
+            {RemovePositionTaken From T NewList}
+          else
+            {RemovePositionTaken From T H|NewList}
+          end
+        end
+     end
+   end
+
+   fun {InitPositionTaken Trainers List}
+     case Trainers of nil then List
+     [] H|T then
+        local P in
+          {Send H get(pos ret(P))}
+          {InitPositionTaken T P|List}
+        end
+     end
    end
 
    proc {Tic NPCs PC Time}
