@@ -80,7 +80,6 @@ define
          {Map.addMsgConsole "You have lost the game."}
          {Map.addMsgConsole "Doom doom doom..."}
       end
-      {Map.closeWindow}
       {Application.exit 0}
    end
 
