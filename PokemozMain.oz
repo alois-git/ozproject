@@ -9,12 +9,13 @@ import
    TrainerNPC
    Map
    Pokemoz
-export 
+   Pickle
+export
    Finish
    Args
 define
    %% Default values
-   MAP = map
+   MAP = "map.txt"
    WILDPOKEMOZPROBA = 50
    NBPOKEMOZ = 1
    DEFAULTSPEED = 9
@@ -50,8 +51,9 @@ define
       {Application.exit 0}
    end
 
-   local Player NPCs in
+   local Player NPCs MapToLoad in
 
+      MapToLoad = {Pickle.load Args.map}
 
       if {Utils.pickMode} == manual then
          Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Utils.pickPokemoz} "Player Pokemoz" 10} pos(x:7 y:7) left}
@@ -61,7 +63,7 @@ define
 
       NPCs = {TrainerNPC.newTrainerNPC  pos(x:2 y:5) right false 1}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 4}|nil
 
-      {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability Args.runawayproba}
+      {GameServer.startGameServer map(map:MapToLoad) NPCs Player Args.delay Args.wildprobability Args.runawayproba}
 
    end
 end
