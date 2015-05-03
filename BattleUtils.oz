@@ -73,7 +73,7 @@ define
             {Map.updatePlayerPokemozInfo Ally}
             {GameServer.stopGameServer defeat}
          else
-            {BattleEnemyTurn Enemy Ally}
+            {BattleAllyTurn Enemy Ally}
          end
       end
       Ack
