@@ -71,14 +71,20 @@ define
          % recursive method to get the best move, keeping the current minimum manathan distance and the best move found
         fun {GetNextMoveRec Position JayPosition Weight MoveIndex SelectedMove}
 
-          local NewPosition NewManathanDistance NumberOfTrainerAround TerrainType NewWeight in
+          local NewPosition NewManathanDistance TerrainType NewWeight NumberOfTrainerAround in
 
            NewPosition = {Utils.calculateNewPos Position Utils.moveType.MoveIndex}
            NewManathanDistance = {Abs (JayPosition.x - NewPosition.x)} + {Abs (JayPosition.y - NewPosition.y)}
-           %NumberOfTrainerAround = {GetNumberTrainerNPCAround {Map.getPositionsAround NewPosition}}
-           %TerrainType = {Map.getTerrain NewPosition.x NewPosition.y}
-           NewWeight = NewManathanDistance
-           if MoveIndex > 4 then
+           NumberOfTrainerAround = {GetNumberTrainerNPCAround {Map.getPositionsAround NewPosition}}
+           TerrainType = {Map.getTerrain NewPosition.x NewPosition.y}
+           if TerrainType ==  grass then
+            NewWeight = NewManathanDistance + 3 + NumberOfTrainerAround
+           elseif TerrainType ==  road then
+            NewWeight = NewManathanDistance + 1 + NumberOfTrainerAround
+           else
+            NewWeight = NewManathanDistance + 9999
+           end
+           if MoveIndex > 3 then
              SelectedMove
            elseif NewWeight < Weight then
              {GetNextMoveRec Position JayPosition NewWeight MoveIndex+1 Utils.moveType.MoveIndex}
@@ -90,7 +96,7 @@ define
         end
       in
 
-       {GetNextMoveRec Position JayPosition 0 1 up}
+       {GetNextMoveRec Position JayPosition 99999 1 up}
       end
 
 

@@ -94,7 +94,7 @@ define
      end
    end
 
-   MoveType = movetype(up down right left stay)
+   MoveType = movetype(up down right left)
 
    fun {WantToFight Pkmz Player}
       T L Y N
