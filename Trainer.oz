@@ -47,8 +47,7 @@ define
                     {GameServer.stopGameServer victory}
                  elseif NewPos.x == Center.x andthen NewPos.y == Center.y then
                     P in
-                    {Send S.super get(pkmz ret(P))}
-                    {Send P heal}
+                    {Send S.pkmz heal}
                  end
               end
               % map change requires sending a message so it will wait until pos updated
