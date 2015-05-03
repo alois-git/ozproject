@@ -3,6 +3,7 @@ import
    Utils
    Trainer
    GameServer
+   Map
 export
    NewTrainerManual
 
@@ -30,7 +31,7 @@ define
               {Utils.printf "play"}
               pc(state:playing super:S.super)
             else
-            {Utils.printf "unknow"}
+              {Send S.super Msg}
               pc(state:waiting super:S.super)
             end
          [] pc(state:playing super:_) then
@@ -41,11 +42,10 @@ define
               {Send S.super get(dir ret(D))}
               if NewDirection == D then
                 {Send GameServer.gameState get(ret(CurrentGameState))}
-                {Utils.printf D}
+
                 NewPos = {Map.calculateNewPos P D}
-                {Utils.printf NewPos}
-                %{Utils.printf {GameServer.isPosFree NewPos}}
-                %andthen {GameServer.isPosFree NewPos}
+                %%{Utils.printf {GameServer.isPosFree NewPos}}
+                %%andthen {GameServer.isPosFree NewPos}
                 if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none  then
                   {Send S.super move}
                 end
