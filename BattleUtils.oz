@@ -81,7 +81,9 @@ define
    in
       {Send GameServer.gameState wait(Ack)}
       {Wait Ack}
-      {DrawBattleUI Enemy Ally}
+      if Utils.mode == manual then
+         {DrawBattleUI Enemy Ally}
+      end
       {BattleAllyTurn Enemy Ally}
    end
 
@@ -96,7 +98,13 @@ define
          if {Utils.wantToFight Pkmz Player} then
             {BattleWild Pkmz Player}
          else
-            {Send GameServer.gameState run}
+            F = {Abs {OS.rand}} mod 100
+            if F < RunAwayProbability then
+               {Send GameServer.gameState run}
+            else
+               {Map.addMsgConsole "You cannot flee !"}
+               {BattleWild Pkmz Player}
+            end
          end
       end
    end
