@@ -70,17 +70,17 @@ define
       if Status == victory then
          {Utils.printf "Congratulations, you have won the game."}
          {Utils.printf "Jay would be so proud of you."}
-         {Map.addMsgConsole "Congratulations, you have won the game."}
          {Map.addMsgConsole "Jay would be so proud of you."}
+         {Map.addMsgConsole "Congratulations, you have won the game."}
       else
          {Utils.printf "Doom doom doom..."}
          {Utils.printf "You have lost the game."}
          {Utils.printf "You must play more to be the very best !"}
-         {Map.addMsgConsole "Doom doom doom..."}
-         {Map.addMsgConsole "You have lost the game."}
          {Map.addMsgConsole "You must play more to be the very best !"}
+         {Map.addMsgConsole "You have lost the game."}
+         {Map.addMsgConsole "Doom doom doom..."}
       end
-      PokemozMain.finish = unit
+      {Application.exit 0}
    end
 
    fun {RemovePositionTaken From List NewList}
@@ -107,11 +107,16 @@ define
    end
 
    proc {Tic NPCs PC Time}
+      R
+   in
       {Delay Time}
-      {SendPlayersNotification move(Time) NPCs}
-      {SendPlayersNotification look NPCs}
-      {SendPlayersNotification move(Time) PC}
-      %{NotifyMapChanged}
+      {Send GameState get(state ret(R))}
+      if R == running then
+         {SendPlayersNotification move(Time) NPCs}
+         {SendPlayersNotification look NPCs}
+         {SendPlayersNotification move(Time) PC}
+         %{NotifyMapChanged}
+      end
       {Tic NPCs PC Time}
    end
 

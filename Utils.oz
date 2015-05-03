@@ -4,6 +4,7 @@ import
    OS
    System
    Open
+   PokemozMain
 export
    NewPortObject
    Printf
@@ -12,7 +13,9 @@ export
    LoadMapFile
    PickMode
    PickPokemoz
+   WantToFight
 define
+   Mode
 
    Printf = System.showInfo
 
@@ -81,10 +84,28 @@ define
                 button(text:"Manual" return:M action:toplevel#close))
      in
         {{QTk.build Desc} show}
-        if A then auto else manual end
+        if A then Mode=auto else Mode=manual end
+        Mode
      end
    end
 
    MoveType = movetype(up down right left stay)
+
+   fun {WantToFight Pkmz Player}
+      T L Y N 
+      Desc = lr(label(init:"You are attacked by a Pokemoz of type "#T#" and level "#L#". Do you want to fight ?")
+               button(text:"Yes" return:Y action:toplevel#close)
+               button(text:"No" return:N action:toplevel#close))
+   in
+       {Send Pkmz get(lx ret(L))}
+       {Send Pkmz get(type ret(T))}
+       if Mode == manual then
+          {{QTk.build Desc} show}
+          if Y then true else false end
+       else
+          PokemozMain.args.autofight == 2
+      end
+   end
+
 
 end

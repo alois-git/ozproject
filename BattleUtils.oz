@@ -44,11 +44,10 @@ define
 
    proc {Battle Enemy Ally}
 
-      proc {BattleEnemyTurn Enemy Ally Display}
+      proc {BattleAllyTurn Enemy Ally Display}
          V in
          {Send Enemy attackedby(Ally)}
          % Display.h1.update ( Enemy.getHealth )
-         {Map.updatePlayerPokemozInfo Enemy}
          {Send Enemy isko(ret(V))}
          if V then
             Exp in
@@ -58,11 +57,11 @@ define
             {Map.addMsgConsole "Your Pokemoz Won "#Exp#"XP !"}
             {Send GameServer.gameState run}
          else
-            {BattleAllyTurn Enemy Ally Display}
+            {BattleEnemyTurn Enemy Ally Display}
          end
       end
 
-      proc {BattleAllyTurn Enemy Ally Display}
+      proc {BattleEnemyTurn Enemy Ally Display}
          V in
          {Send Ally attackedby(Enemy)}
          % Display.h2.update ( Ally.getHealth )
@@ -71,7 +70,7 @@ define
          if V then
             {GameServer.stopGameServer defeat}
          else
-            {BattleEnemyTurn Enemy Ally Display}
+            {BattleAllyTurn Enemy Ally Display}
          end
       end
       Ack
@@ -84,10 +83,18 @@ define
    end
 
    proc {WalkInGrass Player}
-      R in
+      R F Pkmz Ack
+   in
       R = {Abs {OS.rand}} mod 100
       if R < Probability then
-         {BattleWild {Pokemoz.newRandomPokemoz} Player}
+         {Send GameServer.gameState wait(Ack)}
+         {Wait Ack}
+         Pkmz = {Pokemoz.newRandomPokemoz}
+         if {Utils.wantToFight Pkmz Player} then
+            {BattleWild Pkmz Player}
+         else
+            {Send GameServer.gameState run}
+         end
       end
    end
 

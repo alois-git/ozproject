@@ -1,5 +1,6 @@
 functor
 import
+   QTk at 'x-oz://system/wp/QTk.ozf'
    Utils
    Trainer
    GameServer
@@ -19,6 +20,7 @@ define
       %%    guimove(NewDirection) -- trigger a movement form the gui (move forward or turn)
       %%    fight(POKEMOZ) -- see Trainer
       %%    haslost(ret(R)) -- see Trainer
+      %%    wanttofight(POKEMOZ ret(RETURN))
       %%
       %% This object can trigger a battle with the NPC without it's consent (via BattleUtils)
 
@@ -51,7 +53,7 @@ define
                      {Send GameServer.pC get(pkmz ret(P))}
                      {Send P heal}
                   elseif Terrain == grass then
-                     {BattleUtils.walkInGrass GameServer.pC}
+                     thread {BattleUtils.walkInGrass GameServer.pC} end
                   end
               else
                 {Send S.super turn(NewDirection)}
@@ -70,4 +72,6 @@ define
    in
       {Utils.newPortObject InitTrainerManual FunTrainerManual}
    end
+
+   
 end

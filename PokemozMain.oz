@@ -9,7 +9,9 @@ import
    TrainerNPC
    Map
    Pokemoz
-export Finish
+export 
+   Finish
+   Args
 define
    %% Default values
    MAP = map
@@ -57,13 +59,10 @@ define
          Player = {TrainerAuto.newTrainerAuto {Pokemoz.newPokemoz water "Auto Player Pokemoz" 5} pos(x:7 y:7) left}
       end
 
-      NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 1}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 4}|nil
+      NPCs = {TrainerNPC.newTrainerNPC  pos(x:2 y:5) right false 1}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 4}|nil
 
       {Utils.printf "Init game"}
       {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability}
 
    end
-   {Wait Finish}
-   {Utils.printf "exit game"}
-   {Application.exit 0}
 end

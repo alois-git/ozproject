@@ -51,13 +51,16 @@ define
                      {Send S.super get(pkmz ret(P))}
                      {Send P heal}
                   elseif {Map.getTerrain NewPos.x NewPos.y} == grass then
-                     {BattleUtils.walkInGrass GameServer.pC}
+                     thread {BattleUtils.walkInGrass GameServer.pC} end
                   end
                end
             else
                {Send S.super turn(NewMove)}
             end
             S
+          [] wanttofight(Pkmz ret(R)) then
+             R = true
+             S
          else
             {Send S.super Msg}
             S
