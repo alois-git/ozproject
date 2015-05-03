@@ -14,12 +14,14 @@ export
 
 define
    Probability
+   RunAwayProbability
    Type
 
-   proc {SetupBattle P}
+   proc {SetupBattle P RunAwayP}
       F G W CD in
       CD = {OS.getCWD}
       Probability = P
+      RunAwayProbability = RunAwayP
       G = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
       F = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
       W = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
@@ -32,21 +34,20 @@ define
       {Send Player get(pkmz ret(Ally))}
       {Wait Enemy}
       {Wait Ally}
-      {Battle Enemy Ally}
+      {Battle Enemy Ally false}
    end
 
 
    proc {BattleWild Wild Pkmz}
-      {Battle Wild Pkmz}
+      {Battle Wild Pkmz true}
    end
 
-   proc {Battle Enemy Ally}
+   proc {Battle Enemy Ally Wild}
 
-      proc {BattleEnemyTurn Enemy Ally Display}
+      proc {BattleEnemyTurn Enemy Ally}
          V in
          {Send Enemy attackedby(Ally)}
          % Display.h1.update ( Enemy.getHealth )
-         {Map.updatePlayerPokemozInfo Enemy}
          {Send Enemy isko(ret(V))}
          if V then
             Exp in
@@ -54,32 +55,37 @@ define
             {Send Ally addxp(Exp)}
             {Map.addMsgConsole "Your have won the combat !"}
             {Map.addMsgConsole "Your Pokemoz Won "#Exp#"XP !"}
+            {Map.updatePlayerPokemozInfo Ally}
             {Send GameServer.gameState run}
          else
-            {BattleAllyTurn Enemy Ally Display}
+            {BattleAllyTurn Enemy Ally}
          end
       end
 
-      proc {BattleAllyTurn Enemy Ally Display}
+      proc {BattleAllyTurn Enemy Ally}
          V in
          {Send Ally attackedby(Enemy)}
          % Display.h2.update ( Ally.getHealth )
-         {Map.updatePlayerPokemozInfo Ally}
          {Send Ally isko(ret(V))}
          if V then
             {Map.addMsgConsole "Your have lost the combat !"}
+            {Map.updatePlayerPokemozInfo Ally}
             {GameServer.stopGameServer defeat}
          else
-            {BattleEnemyTurn Enemy Ally Display}
+            {BattleEnemyTurn Enemy Ally}
          end
       end
       Ack
-      Display
+      Fight
    in
       {Send GameServer.gameState wait(Ack)}
       {Wait Ack}
-      Display = {DrawBattleUI Enemy Ally}
-      {BattleAllyTurn Enemy Ally Display}
+      Fight = {DrawBattleUI Enemy Ally Wild}
+      if Fight == true then
+        {BattleAllyTurn Enemy Ally}
+      else
+        {Send GameServer.gameState run}
+      end
    end
 
    proc {WalkInGrass Player}
@@ -90,16 +96,30 @@ define
       end
    end
 
-   fun {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Display Screen TextArea in
+   fun {DrawBattleUI Pkmz1 Pkmz2 Wild}
+      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Display Screen TextArea R F C in
+
+      if Wild == true then
       {{QTk.build td(
                   canvas(  width:900
                            height:300
                            handle:Screen)
                   canvas(width:800 height:100 handle:TextArea)
-                  button(text:"Ok" action:toplevel#close)
+                  button(text:"Run away" return:R action:toplevel#close)
+                  button(text:"Fight !" return:F action:toplevel#close)
                   )}
             show}
+      else
+      {{QTk.build td(
+                  canvas(  width:900
+                           height:300
+                           handle:Screen)
+                  canvas(width:800 height:100 handle:TextArea)
+                  button(text:"Ok" return:C action:toplevel#close)
+                  )}
+            show}
+      end
+
       {Send Pkmz1 get(hp ret(H1))}
       {Send Pkmz2 get(hp ret(H2))}
 
@@ -124,6 +144,20 @@ define
       {TextArea create(text 0 0 anchor:nw text:"You are being attacked !")}
 
       Display = text(h1:H1 h2:H2)
+      if R then
+        R in
+        R = {Abs {OS.rand}} mod 100
+        {Map.addMsgConsole "Trying to run away."}
+        if R < RunAwayProbability then
+           {Map.addMsgConsole "You ran away"}
+           false
+        else
+           {Map.addMsgConsole "You failed to run away prepare to fight !"}
+           true
+        end
+      else
+        true
+      end
 
    end
 

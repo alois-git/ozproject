@@ -17,7 +17,7 @@ define
    NBPOKEMOZ = 1
    DEFAULTSPEED = 9
    DELAY = 200
-   RUNAWAYPROBA = 0
+   RUNAWAYPROBA = 20
    AUTOFIGHT = 2
    Finish
 
@@ -59,7 +59,7 @@ define
 
       NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 1}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 4}|nil
 
-      {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability}
+      {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability Args.runawayproba}
 
    end
    {Wait Finish}
