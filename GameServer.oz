@@ -34,7 +34,7 @@ define
             case Msg
             of run then  game(state:running posTaken:S.posTaken)
             [] wait(Ack) then Ack=unit game(state:waiting posTaken:S.posTaken)
-            [] get(ret(R)) then R=S.state S
+            [] get(D ret(R)) then R=S.D S
             [] moved(From To Ack) then
               NewPosTaken in
               NewPosTaken ={RemovePositionTaken From To|S.posTaken nil}
@@ -120,16 +120,14 @@ define
       {Map.redraw NPCs PC}
    end
 
-   fun {IsPosFree Pos}
+   fun {IsPosFree Pos TakenPositions}
       %% Return false if a trainer in on this position pos(x:X y:Y), true otherwise
 
-      fun {IsPosFreeRec Pos Trainers}
-         case Trainers
+      fun {IsPosFreeRec Pos Positions}
+         case Positions
          of H|T then
             local P in
-            {Send H get(pos ret(P))}
-
-            if P == Pos then
+            if H.x == Pos.x andthen H.y == Pos.y then
                false
             else
                {IsPosFreeRec Pos T}
@@ -139,7 +137,7 @@ define
          end
       end
    in
-      {IsPosFreeRec Pos NPCs}
+      {IsPosFreeRec Pos TakenPositions}
    end
 
 end

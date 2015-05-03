@@ -36,7 +36,7 @@ define
             {Send S.super get(dir ret(Dir))}
             if NewMove == Dir then
                NewPos = {Map.calculateNewPos Position NewMove}
-               {Send GameServer.gameState get(ret(GameState))}
+               {Send GameServer.gameState get(state ret(GameState))}
                if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
                   {Send S.super move}
                end

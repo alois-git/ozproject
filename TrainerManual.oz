@@ -36,16 +36,11 @@ define
          [] pc(state:playing super:_) then
           case Msg
             of guimove(NewDirection) then
-              local P D CurrentGameState Dir in
+              local P D in
               {Send S.super get(pos ret(P))}
               {Send S.super get(dir ret(D))}
               if NewDirection == D then
-                {Send GameServer.gameState get(ret(CurrentGameState))}
-                NewPos = {Map.calculateNewPos P D}
-                %%andthen {GameServer.isPosFree NewPos}
-                if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none  then
                   {Send S.super move}
-                end
               else
                 {Send S.super turn(NewDirection)}
               end
