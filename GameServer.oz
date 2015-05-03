@@ -25,7 +25,7 @@ define
       %%    run
       %%    wait
       %%    finish
-      %%    get(ret(RETURN))
+      %%    get(ATTRIBUTE ret(RETURN))
       %%       where RETURN is an unbound variable
 
       InitGameState = game(state:waiting posTaken:PosTaken)
@@ -124,7 +124,7 @@ define
       {Map.redraw NPCs PC}
    end
 
-   fun {IsPosFree Pos TakenPositions}
+   fun {IsPosFree Pos}
       %% Return false if a trainer in on this position pos(x:X y:Y), true otherwise
 
       fun {IsPosFreeRec Pos Positions}
@@ -140,7 +140,9 @@ define
             true
          end
       end
+      TakePositions
    in
+      {Send GameState get(posTaken ret(TakenPositions))}
       {IsPosFreeRec Pos TakenPositions}
    end
 
