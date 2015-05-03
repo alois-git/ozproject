@@ -27,7 +27,7 @@ define
       fun {FunTrainer S Msg}
          case Msg
          of move then
-            Ack NewPos TakenPositions CurrentGameState in
+            Ack NewPos CurrentGameState in
             case S.dir
               of up then NewPos = pos(x:S.pos.x y:(S.pos.y-1))
               [] down  then NewPos =pos(x:S.pos.x y:(S.pos.y+1))
@@ -36,9 +36,8 @@ define
             end
 
             {Send GameServer.gameState get(state ret(CurrentGameState))}
-            {Send GameServer.gameState get(posTaken ret(TakenPositions))}
 
-            if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos TakenPositions} then
+            if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
               {Send GameServer.gameState moved(S.pos NewPos Ack)}
               {Wait Ack}
               local Jay Center in

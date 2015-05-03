@@ -4,7 +4,8 @@ import
    GameServer
    Pokemoz
    OS
-
+   Utils
+   Map
 export
    BattleTrainer
    WalkInGrass
@@ -14,14 +15,13 @@ export
 define
    Probability
    Type
-   Screen
 
    proc {SetupBattle P}
       F G W CD in
       CD = {OS.getCWD}
       Probability = P
-      F = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
-      G = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
+      G = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
+      F = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
       W = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
       Type = type(fire:F grass:G water:W)
    end
@@ -41,13 +41,14 @@ define
       {Send Player get(pkmz ret(Pkmz))}
       {Battle Wild Pkmz}
    end
-      
+
    proc {Battle Enemy Ally}
 
       proc {BattleEnemyTurn Enemy Ally Display}
          V in
          {Send Enemy attackedby(Ally)}
          % TODO Display.h1.update ( Enemy.getHealth )
+         {Map.updatePlayerPokemozInfo Enemy}
          {Send Enemy isko(ret(V))}
          if V then
             Exp in
@@ -61,8 +62,9 @@ define
 
       proc {BattleAllyTurn Enemy Ally Display}
          V in
-         {Send Ally attackdby(Enemy)}
+         {Send Ally attackedby(Enemy)}
          % TODO Display.h2.update ( Ally.getHealth )
+         {Map.updatePlayerPokemozInfo Ally}
          {Send Ally isko(ret(V))}
          if V then
             {GameServer.stopGameServer defeat}
@@ -88,7 +90,7 @@ define
    end
 
    fun {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 Display in
+      H1 H2 L1 L2 T1 T2 Display Screen in
       {{QTk.build lr(
                   canvas(  width:900
                            height:900
@@ -97,16 +99,21 @@ define
             show}
       {Send Pkmz1 get(hp ret(H1))}
       {Send Pkmz2 get(hp ret(H2))}
+
       {Send Pkmz1 get(lx ret(L1))}
       {Send Pkmz2 get(lx ret(L2))}
+
       {Send Pkmz1 get(type ret(T1))}
       {Send Pkmz2 get(type ret(T2))}
+
+      {Utils.printf T1}
+
       {Screen create(text 0 0 anchor:nw text:H1)}
       {Screen create(text 0 200 anchor:nw text:L1)}
-    
+
       {Screen create(image 150 0 anchor:nw image:Type.T1)}
       {Screen create(image 450 0 anchor:nw image:Type.T2)}
-      
+
       {Screen create(text 750 0 anchor:nw text:H2)}
       {Screen create(text 750 200 anchor:nw text:L2)}
 

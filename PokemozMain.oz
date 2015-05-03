@@ -52,12 +52,12 @@ define
 
 
       if {Utils.pickMode} == manual then
-         Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Utils.pickPokemoz} "Player Pokemoz" 5} pos(x:7 y:7) left}
+         Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Utils.pickPokemoz} "Player Pokemoz" 10} pos(x:7 y:7) left}
       else
          Player = {TrainerAuto.newTrainerAuto {Pokemoz.newPokemoz water "Auto Player Pokemoz" 5} pos(x:7 y:7) left}
       end
 
-      NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 0}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 2}|nil
+      NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 1}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 4}|nil
 
       {Utils.printf "Init game"}
       {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability}

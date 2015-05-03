@@ -12,6 +12,7 @@ export
    GetPositionsAround
    AddMsgConsole
    CalculateNewPos
+   UpdatePlayerPokemozInfo
 define
    Layout
    Width
