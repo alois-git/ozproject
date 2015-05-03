@@ -40,6 +40,17 @@ define
                if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
                   {Send S.super move}
                end
+               local Jay Center in
+                  Jay = {Map.getJayPosition}
+                  Center = {Map.getCenterPosition}
+                  if NewPos.x == Jay.x andthen NewPos.y == Jay.y then
+                     {GameServer.stopGameServer victory}
+                  elseif NewPos.x == Center.x andthen NewPos.y == Center.y then
+                     P in
+                     {Send S.super get(pkmz ret(P))}
+                     {Send P heal}
+                  end
+               end
             else
                {Send S.super turn(NewMove)}
             end

@@ -8,6 +8,7 @@ export
    Redraw
    GetTerrain
    GetJayPosition
+   GetCenterPosition
    GetPositionsAround
    AddMsgConsole
    CalculateNewPos
@@ -211,6 +212,10 @@ define
 
    fun {GetJayPosition}
       JayPos
+   end
+
+   fun {GetCenterPosition}
+      CenterPos
    end
 
 

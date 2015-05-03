@@ -34,7 +34,7 @@ define
               pc(state:waiting super:S.super)
             end
          [] pc(state:playing super:_) then
-          case Msg
+            case Msg
             of guimove(NewDirection) then
               local P D in
               {Send S.super get(pos ret(P))}

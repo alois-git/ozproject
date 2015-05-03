@@ -37,10 +37,21 @@ define
 
             {Send GameServer.gameState get(state ret(CurrentGameState))}
             {Send GameServer.gameState get(posTaken ret(TakenPositions))}
-            
+
             if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos TakenPositions} then
               {Send GameServer.gameState moved(S.pos NewPos Ack)}
               {Wait Ack}
+              local Jay Center in
+                 Jay = {Map.getJayPosition}
+                 Center = {Map.getCenterPosition}
+                 if NewPos.x == Jay.x andthen NewPos.y == Jay.y then
+                    {GameServer.stopGameServer victory}
+                 elseif NewPos.x == Center.x andthen NewPos.y == Center.y then
+                    P in
+                    {Send S.super get(pkmz ret(P))}
+                    {Send P heal}
+                 end
+              end
               % map change requires sending a message so it will wait until pos updated
               thread {GameServer.notifyMapChanged} end
               trainer(pkmz:S.pkmz pos:NewPos dir:S.dir)

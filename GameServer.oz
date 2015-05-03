@@ -3,6 +3,8 @@ import
    Utils
    Map
    BattleUtils
+   PokemozMain
+   Application
 
 export
    StartGameServer
@@ -35,6 +37,7 @@ define
             of run then  game(state:running posTaken:S.posTaken)
             [] wait(Ack) then Ack=unit game(state:waiting posTaken:S.posTaken)
             [] get(D ret(R)) then R=S.D S
+            [] finish then game(state:finished posTaken:PosTaken)
             [] moved(From To Ack) then
               NewPosTaken in
               NewPosTaken ={RemovePositionTaken From To|S.posTaken nil}
@@ -64,7 +67,7 @@ define
    proc {StopGameServer Status}
       %% This proc stops the server and display the victory / defeat notification
       {Send GameState finish}
-      if status == victory then
+      if Status == victory then
          {Utils.printf "Congratulations, you have won the game."}
          {Utils.printf "Jay would be so proud of you."}
       else
@@ -72,6 +75,7 @@ define
          {Utils.printf "You have lost the game."}
          {Utils.printf "You must play more to be the very best !"}
       end
+      PokemozMain.finish = unit
    end
 
    fun {RemovePositionTaken From List NewList}

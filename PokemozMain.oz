@@ -9,6 +9,7 @@ import
    TrainerNPC
    Map
    Pokemoz
+export Finish
 define
    %% Default values
    MAP = map
@@ -18,7 +19,7 @@ define
    DELAY = 200
    RUNAWAYPROBA = 0
    AUTOFIGHT = 2
-   A
+   Finish
 
    %% Posible arguments
    Args = {Application.getArgs
@@ -62,7 +63,7 @@ define
       {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability}
 
    end
-   {Wait A}
+   {Wait Finish}
    {Utils.printf "exit game"}
    {Application.exit 0}
 end
