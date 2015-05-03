@@ -18,7 +18,9 @@ define
    Grass
    Path
    Jay
+   JayPos
    Center
+   CenterPos
    TrainerUp
    TrainerDown
    TrainerLeft
@@ -40,8 +42,8 @@ define
       %% Load textures
       Grass = {QTk.newImage photo(file:CD#'/images/grass.gif')}
       Path = {QTk.newImage photo(file:CD#'/images/path.gif')}
-      Center = {QTk.newImage photo(file:CD#'/images/path.gif')}
-      Jay = {QTk.newImage photo(file:CD#'/images/path.gif')}
+      Center = {QTk.newImage photo(file:CD#'/images/joy.gif')}
+      Jay = {QTk.newImage photo(file:CD#'/images/jay.gif')}
       TrainerUp = {QTk.newImage photo(file:CD#'/images/trainerUp.gif')}
       TrainerDown = {QTk.newImage photo(file:CD#'/images/trainerDown.gif')}
       TrainerLeft = {QTk.newImage photo(file:CD#'/images/trainerLeft.gif')}
@@ -55,26 +57,26 @@ define
       HeightText = 10
 
       %% Setup the map.
-      %% MapLayout must be of layout(map:map(r(...) [r(...)]) width:W height:H)
+      %% MapLayout must be of map(r(...) [r(...)]))
       %%    or default
 
       if MapLayout == default then
          Layout = map(
-                     r(1 1 1 0 0 0 2)
+                     r(1 1 1 0 0 0 0)
                      r(1 1 1 0 0 1 1)
                      r(1 1 1 0 0 1 1)
                      r(0 0 0 0 0 1 1)
                      r(0 0 0 1 1 1 1)
                      r(0 0 0 1 1 0 0)
-                     r(0 0 0 0 0 0 3)
+                     r(0 0 0 0 0 0 0)
                   )
-         Width = 7
-         Height = 7
       else
          Layout = MapLayout.map
-         Width = MapLayout.width
-         Height = MapLayout.height
       end
+      Height = {Record.width Layout}
+      Width = {Record.width Layout.1}
+      JayPos = pos(x:Width y:1)
+      CenterPos = pos(x:1 y:Width)
       {InitWindow PCP}
       {Draw}
    end
@@ -182,6 +184,8 @@ define
           end
         end
       end
+      {DrawImageGrid Jay JayPos.x JayPos.y}
+      {DrawImageGrid Center CenterPos.x CenterPos.y}
    end
 
    proc {Redraw NPCs PC}
@@ -191,35 +195,24 @@ define
    end
 
    fun {GetTerrain X Y}
-         if X < 1 orelse Y < 1 orelse X > Width orelse Y > Height then
-            none
-         else
-            case Layout.Y.X
-            of 0 then road
-            [] 1 then grass
-            [] 2 then jay
-            [] 3 then center
-            end
+      if X < 1 orelse Y < 1 orelse X > Width orelse Y > Height then
+         none
+      elseif X == JayPos.x andthen Y == JayPos.y then jay
+      elseif X == CenterPos.x andthen Y == CenterPos.y then center
+      else
+         case Layout.Y.X
+         of 0 then road
+         [] 1 then grass
+         [] 2 then jay
+         [] 3 then center
          end
+      end
    end
 
    fun {GetJayPosition}
-      {GetJayPositionRec 1 1}
+      JayPos
    end
 
-   fun {GetJayPositionRec X Y}
-     if X > Width andthen Y > Height then
-        none
-     elseif {GetTerrain X Y} == jay then
-        pos(x:X y:Y)
-     elseif X > Width then
-       {GetJayPositionRec 1 Y+1}
-     elseif Y > Height then
-       {GetJayPositionRec X+1 1}
-     else
-       {GetJayPositionRec X+1 Y}
-     end
-   end
 
    fun {CalculateNewPos P MoveType}
       case MoveType of up then
