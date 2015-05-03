@@ -56,7 +56,7 @@ define
       MapToLoad = {Pickle.load Args.map}
 
       if {Utils.pickMode} == manual then
-         Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Utils.pickPokemoz} "Player Pokemoz" 10} pos(x:7 y:7) left}
+         Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Utils.pickPokemoz} "Player Pokemoz" 5} pos(x:7 y:7) left}
       else
          Player = {TrainerAuto.newTrainerAuto {Pokemoz.newPokemoz water "Auto Player Pokemoz" 5} pos(x:7 y:7) left}
       end
