@@ -47,13 +47,15 @@ define
       proc {BattleEnemyTurn Enemy Ally Display}
          V in
          {Send Enemy attackedby(Ally)}
-         % TODO Display.h1.update ( Enemy.getHealth )
+         % Display.h1.update ( Enemy.getHealth )
          {Map.updatePlayerPokemozInfo Enemy}
          {Send Enemy isko(ret(V))}
          if V then
             Exp in
             {Send Enemy get(lx ret(Exp))}
             {Send Ally addxp(Exp)}
+            {Map.addMsgConsole "Your have won the combat !"}
+            {Map.addMsgConsole "Your Pokemoz Won "#Exp#"XP !"}
             {Send GameServer.gameState run}
          else
             {BattleAllyTurn Enemy Ally Display}
@@ -63,7 +65,7 @@ define
       proc {BattleAllyTurn Enemy Ally Display}
          V in
          {Send Ally attackedby(Enemy)}
-         % TODO Display.h2.update ( Ally.getHealth )
+         % Display.h2.update ( Ally.getHealth )
          {Map.updatePlayerPokemozInfo Ally}
          {Send Ally isko(ret(V))}
          if V then
@@ -90,11 +92,13 @@ define
    end
 
    fun {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 Display Screen in
+      H1 H2 L1 L2 T1 T2 Display Screen TextArea in
       {{QTk.build lr(
                   canvas(  width:900
                            height:900
                            handle:Screen)
+                  canvas(width:900 height:100 handle:TextArea)
+                  button(text:"close" action:toplevel#close)
                   )}
             show}
       {Send Pkmz1 get(hp ret(H1))}
