@@ -80,6 +80,7 @@ define
          {Map.addMsgConsole "You have lost the game."}
          {Map.addMsgConsole "Doom doom doom..."}
       end
+      {Map.closeWindow}
       {Application.exit 0}
    end
 
@@ -130,12 +131,8 @@ define
    end
 
    proc {NotifyMapChanged}
-      CurrentGameState in
-      {Send GameState get(state ret(CurrentGameState))}
-      if (CurrentGameState == running) then
-        {Map.draw}
-        {Map.redraw NPCs PC}
-      end
+      {Map.draw}
+      {Map.redraw NPCs PC}
    end
 
    fun {IsPosFree Pos}

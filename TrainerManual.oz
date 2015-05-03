@@ -11,7 +11,7 @@ export
 
 define
 
-   fun {NewTrainerManual Pokemoz Position Direction } % could add an icon ?
+   fun {NewTrainerManual Pokemoz Position Direction} % could add an icon ?
       %% This object represent an player trainer
       %% The position and Direction arguments are initial
       %%    Position = pos(x:X y:Y)
@@ -73,5 +73,5 @@ define
       {Utils.newPortObject InitTrainerManual FunTrainerManual}
    end
 
-   
+
 end
