@@ -13,6 +13,7 @@ export
    AddMsgConsole
    CalculateNewPos
    UpdatePlayerPokemozInfo
+   CloseWindow
 define
    Layout
    Width
@@ -27,6 +28,10 @@ define
    TrainerDown
    TrainerLeft
    TrainerRight
+   NPCUp
+   NPCDown
+   NPCLeft
+   NPCRight
    MapTextures
    Window
    Grid
@@ -50,6 +55,11 @@ define
       TrainerDown = {QTk.newImage photo(file:CD#'/images/trainerDown.gif')}
       TrainerLeft = {QTk.newImage photo(file:CD#'/images/trainerLeft.gif')}
       TrainerRight = {QTk.newImage photo(file:CD#'/images/trainerRight.gif')}
+
+      NPCUp = {QTk.newImage photo(file:CD#'/images/npcUp.gif')}
+      NPCDown = {QTk.newImage photo(file:CD#'/images/npcDown.gif')}
+      NPCLeft = {QTk.newImage photo(file:CD#'/images/npcLeft.gif')}
+      NPCRight = {QTk.newImage photo(file:CD#'/images/npcRight.gif')}
 
       end
       MapTextures = maptextures(Path Grass Jay Center)
@@ -113,6 +123,10 @@ define
       end
    end
 
+   proc {CloseWindow}
+      {Window close}
+   end
+
    proc {DrawImageGrid Image X Y}
       {Grid create(image WidthCell*X-(WidthCell div 2) HeightCell*Y-(HeightCell div 2) image:Image)}
    end
@@ -138,11 +152,28 @@ define
       {Grid create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:PlayerIcon)}
    end
 
+   proc {DrawNPC Trainer}
+      PlayerIcon Position Direction
+   in
+      {Send Trainer get(dir ret(Direction))}
+      case Direction of up then
+        PlayerIcon = NPCUp
+      [] down then
+             PlayerIcon = NPCDown
+      [] right then
+             PlayerIcon = NPCRight
+      else
+            PlayerIcon = NPCLeft
+      end
+      {Send Trainer get(pos ret(Position))}
+      {Grid create(image WidthCell*Position.x-(WidthCell div 2) HeightCell*Position.y-(HeightCell div 2) image:PlayerIcon)}
+   end
+
    proc {DrawNPCs NPCs}
       case NPCs of nil then
         skip
       [] H|T then
-         {DrawTrainer H}
+         {DrawNPC H}
          {DrawNPCs T}
       end
    end
@@ -218,7 +249,6 @@ define
    fun {GetCenterPosition}
       CenterPos
    end
-
 
    fun {CalculateNewPos P MoveType}
       case MoveType of up then

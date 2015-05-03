@@ -110,13 +110,13 @@ define
    end
 
    proc {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Display Screen TextArea in
+      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Display Screen TextArea C in
 
       {{QTk.build td(
                   canvas(  width:900
                            height:300
                            handle:Screen)
-                  )}
+                  button(text:"Ok" return:C action:toplevel#close))}
             show}
 
       {Send Pkmz1 get(hp ret(H1))}
@@ -141,6 +141,9 @@ define
       {Screen create(text 750 200 anchor:nw text:"LVL: "#L2)}
 
       Display = text(h1:H1 h2:H2)
+
+      if C then skip end
+
    end
 
 end
