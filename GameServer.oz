@@ -68,14 +68,9 @@ define
       %% This proc stops the server and display the victory / defeat notification
       {Send GameState finish}
       if Status == victory then
-         {Utils.printf "Congratulations, you have won the game."}
-         {Utils.printf "Jay would be so proud of you."}
          {Map.addMsgConsole "Congratulations, you have won the game."}
          {Map.addMsgConsole "Jay would be so proud of you."}
       else
-         {Utils.printf "Doom doom doom..."}
-         {Utils.printf "You have lost the game."}
-         {Utils.printf "You must play more to be the very best !"}
          {Map.addMsgConsole "Doom doom doom..."}
          {Map.addMsgConsole "You have lost the game."}
          {Map.addMsgConsole "You must play more to be the very best !"}

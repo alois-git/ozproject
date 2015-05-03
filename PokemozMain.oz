@@ -59,7 +59,6 @@ define
 
       NPCs = {TrainerNPC.newTrainerNPC  pos(x:1 y:7) left false 1}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 4}|nil
 
-      {Utils.printf "Init game"}
       {GameServer.startGameServer default NPCs Player Args.delay Args.wildprobability}
 
    end

@@ -36,9 +36,7 @@ define
    end
 
 
-   proc {BattleWild Wild Player}
-      Pkmz in
-      {Send Player get(pkmz ret(Pkmz))}
+   proc {BattleWild Wild Pkmz}
       {Battle Wild Pkmz}
    end
 
@@ -69,6 +67,7 @@ define
          {Map.updatePlayerPokemozInfo Ally}
          {Send Ally isko(ret(V))}
          if V then
+            {Map.addMsgConsole "Your have lost the combat !"}
             {GameServer.stopGameServer defeat}
          else
             {BattleEnemyTurn Enemy Ally Display}
@@ -92,17 +91,20 @@ define
    end
 
    fun {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 Display Screen TextArea in
-      {{QTk.build lr(
+      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Display Screen TextArea in
+      {{QTk.build td(
                   canvas(  width:900
-                           height:900
+                           height:300
                            handle:Screen)
-                  canvas(width:900 height:100 handle:TextArea)
-                  button(text:"close" action:toplevel#close)
+                  canvas(width:800 height:100 handle:TextArea)
+                  button(text:"Ok" action:toplevel#close)
                   )}
             show}
       {Send Pkmz1 get(hp ret(H1))}
       {Send Pkmz2 get(hp ret(H2))}
+
+      {Send Pkmz1 get(hpmax ret(MaxH1))}
+      {Send Pkmz2 get(hpmax ret(MaxH2))}
 
       {Send Pkmz1 get(lx ret(L1))}
       {Send Pkmz2 get(lx ret(L2))}
@@ -110,16 +112,16 @@ define
       {Send Pkmz1 get(type ret(T1))}
       {Send Pkmz2 get(type ret(T2))}
 
-      {Utils.printf T1}
-
-      {Screen create(text 0 0 anchor:nw text:H1)}
-      {Screen create(text 0 200 anchor:nw text:L1)}
+      {Screen create(text 0 0 anchor:nw text:"HP: "#H1#"/"#MaxH1)}
+      {Screen create(text 0 200 anchor:nw text:"LVL: "#L1)}
 
       {Screen create(image 150 0 anchor:nw image:Type.T1)}
       {Screen create(image 450 0 anchor:nw image:Type.T2)}
 
-      {Screen create(text 750 0 anchor:nw text:H2)}
-      {Screen create(text 750 200 anchor:nw text:L2)}
+      {Screen create(text 750 0 anchor:nw text:"HP: "#H2#"/"#MaxH2)}
+      {Screen create(text 750 200 anchor:nw text:"LVL: "#L2)}
+
+      {TextArea create(text 0 0 anchor:nw text:"You are being attacked !")}
 
       Display = text(h1:H1 h2:H2)
 
