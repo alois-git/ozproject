@@ -3,6 +3,7 @@ import
    Utils
    GameServer
    Map
+   PokemozMain
 export
    NewTrainer
 
