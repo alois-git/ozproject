@@ -52,6 +52,7 @@ define
               end
               % map change requires sending a message so it will wait until pos updated
               thread {GameServer.notifyMapChanged} end
+              {Delay Pokemoz.args.delay div PokemozMain.args.speed}
               trainer(pkmz:S.pkmz pos:NewPos dir:S.dir)
             else
               S
