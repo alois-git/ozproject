@@ -77,7 +77,6 @@ define
          end
       end
       Ack
-      Fight
    in
       {Send GameServer.gameState wait(Ack)}
       {Wait Ack}
@@ -110,7 +109,7 @@ define
    end
 
    proc {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Display Screen TextArea C in
+      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Screen C in
 
       {{QTk.build td(
                   canvas(  width:900
@@ -139,8 +138,6 @@ define
 
       {Screen create(text 750 0 anchor:nw text:"HP: "#H2#"/"#MaxH2)}
       {Screen create(text 750 200 anchor:nw text:"LVL: "#L2)}
-
-      Display = text(h1:H1 h2:H2)
 
       if C then skip end
 

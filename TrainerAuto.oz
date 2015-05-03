@@ -1,11 +1,9 @@
 functor
 import
    Utils
-   OS
    GameServer
    Map
    Trainer
-   Pokemoz
    BattleUtils
 export
    NewTrainerAuto
@@ -29,8 +27,8 @@ define
       InitTrainerAuto = pc(super:Super)
 
       fun {FunTrainerAuto S Msg}
-        R NewPos Dir in
-         case Msg of move(Time) then
+         Dir in
+         case Msg of move(_) then
             NewMove Position NewPos GameState in
 	          {Send S.super get(pos ret(Position))}
             NewMove = {GetNextMove Position {Map.getJayPosition}}
@@ -58,9 +56,6 @@ define
                {Send S.super turn(NewMove)}
             end
             S
-          [] wanttofight(Pkmz ret(R)) then
-             R = true
-             S
          else
             {Send S.super Msg}
             S

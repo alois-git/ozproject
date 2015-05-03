@@ -47,7 +47,6 @@ define
                  if NewPos.x == Jay.x andthen NewPos.y == Jay.y then
                     {GameServer.stopGameServer victory}
                  elseif NewPos.x == Center.x andthen NewPos.y == Center.y then
-                    P in
                     {Send S.pkmz heal}
                  end
               end

@@ -87,7 +87,7 @@ define
                 button(text:"Manual" return:M action:toplevel#close))
      in
         {{QTk.build Desc} show}
-        if A then Mode=auto else Mode=manual end
+        if A then Mode=auto elseif M then Mode=manual end
         Mode
      end
    end
@@ -104,7 +104,7 @@ define
        {Send Pkmz get(type ret(T))}
        if Mode == manual then
           {{QTk.build Desc} show}
-          if Y then true else false end
+          if Y then true elseif N then false end
        else
           PokemozMain.args.autofight \= 0
       end

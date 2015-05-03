@@ -1,6 +1,5 @@
 functor
 import
-   QTk at 'x-oz://system/wp/QTk.ozf'
    Utils
    Trainer
    GameServer
@@ -28,9 +27,8 @@ define
       InitTrainerManual = pc(state:waiting super:Super)
 
       fun {FunTrainerManual S Msg}
-         NewPos in
          case S of pc(state:waiting super:_) then
-            case Msg of move(Time) then
+            case Msg of move(_) then
               pc(state:playing super:S.super)
             else
               {Send S.super Msg}
@@ -60,7 +58,7 @@ define
               end
               pc(state:waiting super:S.super)
               end
-          [] move(Time) then
+          [] move(_) then
              S
           else
               {Send S.super Msg}
