@@ -72,7 +72,7 @@ define
       {SendPlayersNotification move(Time) NPCs}
       {SendPlayersNotification look NPCs}
       {SendPlayersNotification move(Time) PC}
-      {NotifyMapChanged}
+      %{NotifyMapChanged}
       {Tic NPCs PC Time}
    end
 
