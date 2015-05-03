@@ -14,12 +14,14 @@ export
 
 define
    Probability
+   RunAwayProbability
    Type
 
-   proc {SetupBattle P}
+   proc {SetupBattle P RunAwayP}
       F G W CD in
       CD = {OS.getCWD}
       Probability = P
+      RunAwayProbability = RunAwayP
       G = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
       F = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
       W = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
@@ -37,49 +39,50 @@ define
 
 
    proc {BattleWild Wild Player}
-      Pkmz in
+      Pkmz
+   in
       {Send Player get(pkmz ret(Pkmz))}
       {Battle Wild Pkmz}
    end
 
    proc {Battle Enemy Ally}
 
-      proc {BattleAllyTurn Enemy Ally Display}
+      proc {BattleAllyTurn Enemy Ally}
          V in
          {Send Enemy attackedby(Ally)}
-         % Display.h1.update ( Enemy.getHealth )
          {Send Enemy isko(ret(V))}
          if V then
             Exp in
             {Send Enemy get(lx ret(Exp))}
             {Send Ally addxp(Exp)}
             {Map.addMsgConsole "Your have won the combat !"}
-            {Map.addMsgConsole "Your Pokemoz Won "#Exp#"XP !"}
+            {Map.addMsgConsole "Your Pokemoz won "#Exp#"XP !"}
+            {Map.updatePlayerPokemozInfo Ally}
             {Send GameServer.gameState run}
          else
-            {BattleEnemyTurn Enemy Ally Display}
+            {BattleEnemyTurn Enemy Ally}
          end
       end
 
-      proc {BattleEnemyTurn Enemy Ally Display}
+      proc {BattleEnemyTurn Enemy Ally}
          V in
          {Send Ally attackedby(Enemy)}
-         % Display.h2.update ( Ally.getHealth )
-         {Map.updatePlayerPokemozInfo Ally}
          {Send Ally isko(ret(V))}
          if V then
+            {Map.addMsgConsole "Your have lost the combat !"}
+            {Map.updatePlayerPokemozInfo Ally}
             {GameServer.stopGameServer defeat}
          else
-            {BattleAllyTurn Enemy Ally Display}
+            {BattleEnemyTurn Enemy Ally}
          end
       end
       Ack
-      Display
+      Fight
    in
       {Send GameServer.gameState wait(Ack)}
       {Wait Ack}
-      Display = {DrawBattleUI Enemy Ally}
-      {BattleAllyTurn Enemy Ally Display}
+      {DrawBattleUI Enemy Ally}
+      {BattleAllyTurn Enemy Ally}
    end
 
    proc {WalkInGrass Player}
@@ -98,18 +101,21 @@ define
       end
    end
 
-   fun {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 Display Screen TextArea in
-      {{QTk.build lr(
+   proc {DrawBattleUI Pkmz1 Pkmz2}
+      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Display Screen TextArea in
+
+      {{QTk.build td(
                   canvas(  width:900
-                           height:900
+                           height:300
                            handle:Screen)
-                  canvas(width:900 height:100 handle:TextArea)
-                  button(text:"close" action:toplevel#close)
                   )}
             show}
+
       {Send Pkmz1 get(hp ret(H1))}
       {Send Pkmz2 get(hp ret(H2))}
+
+      {Send Pkmz1 get(hpmax ret(MaxH1))}
+      {Send Pkmz2 get(hpmax ret(MaxH2))}
 
       {Send Pkmz1 get(lx ret(L1))}
       {Send Pkmz2 get(lx ret(L2))}
@@ -117,19 +123,16 @@ define
       {Send Pkmz1 get(type ret(T1))}
       {Send Pkmz2 get(type ret(T2))}
 
-      {Utils.printf T1}
-
-      {Screen create(text 0 0 anchor:nw text:H1)}
-      {Screen create(text 0 200 anchor:nw text:L1)}
+      {Screen create(text 0 0 anchor:nw text:"HP: "#H1#"/"#MaxH1)}
+      {Screen create(text 0 200 anchor:nw text:"LVL: "#L1)}
 
       {Screen create(image 150 0 anchor:nw image:Type.T1)}
       {Screen create(image 450 0 anchor:nw image:Type.T2)}
 
-      {Screen create(text 750 0 anchor:nw text:H2)}
-      {Screen create(text 750 200 anchor:nw text:L2)}
+      {Screen create(text 750 0 anchor:nw text:"HP: "#H2#"/"#MaxH2)}
+      {Screen create(text 750 200 anchor:nw text:"LVL: "#L2)}
 
       Display = text(h1:H1 h2:H2)
-
    end
 
 end

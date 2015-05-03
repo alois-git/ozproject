@@ -50,14 +50,14 @@ define
       {Utils.newPortObject InitGameState FunGameState}
    end
 
-   proc {StartGameServer MapLayout NPCsP PCP TicTime WildProba}
+   proc {StartGameServer MapLayout NPCsP PCP TicTime WildProba RunAway}
       PositionsTaken in
       NPCs = NPCsP
       PC = PCP
       PositionsTaken = {InitPositionTaken PC|NPCs nil}
       GameState = {NewGameState PositionsTaken}
       {Map.setupMap MapLayout PCP}
-      {BattleUtils.setupBattle WildProba}
+      {BattleUtils.setupBattle WildProba RunAway}
       {Send GameState run}
       {NotifyMapChanged}
       thread {Tic NPCs PC|nil TicTime} end
@@ -130,8 +130,12 @@ define
    end
 
    proc {NotifyMapChanged}
-      {Map.draw}
-      {Map.redraw NPCs PC}
+      CurrentGameState in
+      {Send GameState get(state ret(CurrentGameState))}
+      if (CurrentGameState == running) then
+        {Map.draw}
+        {Map.redraw NPCs PC}
+      end
    end
 
    fun {IsPosFree Pos}

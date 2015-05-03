@@ -50,7 +50,7 @@ define
                      {GameServer.stopGameServer victory}
                   elseif terrain == center then
                      P in
-                     {Send GameServer.pC get(pkmz ret(P))}
+                     {Send S.super get(pkmz ret(P))}
                      {Send P heal}
                   elseif Terrain == grass then
                      thread {BattleUtils.walkInGrass GameServer.pC} end
