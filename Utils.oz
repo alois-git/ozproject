@@ -14,6 +14,7 @@ export
    PickMode
    PickPokemoz
    WantToFight
+   Mode
 define
    Mode
 
