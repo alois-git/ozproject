@@ -104,7 +104,7 @@ define
           {{QTk.build Desc} show}
           if Y then true else false end
        else
-          PokemozMain.args.autofight == 2
+          PokemozMain.args.autofight \= 0
       end
    end
 
