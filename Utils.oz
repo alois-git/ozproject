@@ -68,10 +68,12 @@ define
         ImgG = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
         ImgF = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
         ImgW = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
-        Desc=lr(label(init: "Pick the type of your pokemon")
-                button(image:ImgG return:G action:toplevel#close)
-                button(image:ImgW return:W action:toplevel#close)
-                button(image:ImgF return:F action:toplevel#close))
+        Desc=td(label(init: "Pick the type of your pokemon" height:3)
+                lr(button(image:ImgG return:G action:toplevel#close)
+                   button(image:ImgW return:W action:toplevel#close)
+                   button(image:ImgF return:F action:toplevel#close)
+                  )
+               )
      in
         {{QTk.build Desc} show}
         if G then grass elseif W then water elseif F then fire end
