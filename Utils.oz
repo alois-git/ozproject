@@ -82,9 +82,11 @@ define
 
    fun {PickMode}
      local A M
-        Desc=lr(label(init: "Which mode do you want ?")
-                button(text:"Auto" return:A action:toplevel#close)
-                button(text:"Manual" return:M action:toplevel#close))
+        Desc=td(label(init: "Welcome to Pokemoz ! \n")
+                label(init: "In the auto mode your trainer will move and fight automatically and in manual mode you will have to move with the keyboard arrow and fight.\n")
+                label(init: "Which mode do you want ?\n")
+                lr(button(text:"Auto" return:A action:toplevel#close)
+                button(text:"Manual" return:M action:toplevel#close)))
      in
         {{QTk.build Desc} show}
         if A then Mode=auto else Mode=manual end
@@ -95,7 +97,7 @@ define
    MoveType = movetype(up down right left stay)
 
    fun {WantToFight Pkmz Player}
-      T L Y N 
+      T L Y N
       Desc = lr(label(init:"You are attacked by a Pokemoz of type "#T#" and level "#L#". Do you want to fight ?")
                button(text:"Yes" return:Y action:toplevel#close)
                button(text:"No" return:N action:toplevel#close))
