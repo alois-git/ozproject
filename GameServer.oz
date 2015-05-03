@@ -3,7 +3,6 @@ import
    Utils
    Map
    BattleUtils
-   PokemozMain
    Application
 
 export
@@ -84,16 +83,14 @@ define
    end
 
    fun {RemovePositionTaken From List NewList}
-     case List of nil then NewList
-     [] H|T then
-        local P in
-          if From.x == H.x andthen From.y == H.y then
+      case List of nil then NewList
+      [] H|T then
+         if From.x == H.x andthen From.y == H.y then
             {RemovePositionTaken From T NewList}
-          else
+         else
             {RemovePositionTaken From T H|NewList}
-          end
-        end
-     end
+         end
+      end
    end
 
    fun {InitPositionTaken Trainers List}
@@ -140,12 +137,11 @@ define
       fun {IsPosFreeRec Pos Positions}
          case Positions
          of H|T then
-            local P in
             if H.x == Pos.x andthen H.y == Pos.y then
                false
             else
                {IsPosFreeRec Pos T}
-            end end
+            end
          [] nil then
             true
          end

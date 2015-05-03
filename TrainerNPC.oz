@@ -78,8 +78,8 @@ define
            end
         [] npc(state:lost super:_ move:_ range:_) then
           case Msg
-          of move(Time) then
-             S % the move will be reflected in super, so the npc state hasns't changed
+          of move(_) then
+             S
           [] look then
              S
           else

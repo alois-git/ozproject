@@ -33,7 +33,7 @@ Utils.ozf: Utils.oz
 	$(OZC) Utils.oz
 
 Map.ozf: Map.oz 
-	$(OZC)	Map.oz
+	$(OZC) Map.oz
 
 TrainerManual.ozf: TrainerManual.oz Utils.ozf
 	$(OZC) TrainerManual.oz
@@ -42,10 +42,10 @@ TrainerAuto.ozf: TrainerAuto.oz Utils.ozf
 	$(OZC) TrainerAuto.oz
 
 TrainerNPC.ozf: TrainerNPC.oz Utils.ozf
-	$(OZC)	TrainerNPC.oz
+	$(OZC) TrainerNPC.oz
 
 BattleUtils.ozf: BattleUtils.oz
-	$(OZC)	BattleUtils.oz
+	$(OZC) BattleUtils.oz
 
 PokemozMain.ozf: PokemozMain.oz BattleUtils.ozf Utils.ozf GameServer.ozf Trainer.ozf TrainerManual.ozf TrainerAuto.ozf TrainerNPC.ozf Pokemoz.ozf Map.ozf
 	$(OZC) PokemozMain.oz

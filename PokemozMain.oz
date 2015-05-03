@@ -7,11 +7,9 @@ import
    TrainerManual
    TrainerAuto
    TrainerNPC
-   Map
    Pokemoz
    Pickle
 export
-   Finish
    Args
 define
    %% Default values
@@ -22,7 +20,6 @@ define
    DELAY = 200
    RUNAWAYPROBA = 20
    AUTOFIGHT = 2
-   Finish
 
    %% Posible arguments
    Args = {Application.getArgs
