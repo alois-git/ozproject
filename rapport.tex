@@ -1,0 +1,158 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{listings}
+
+%%%%%%%%%%%%%%%%
+%						%
+%	Listing code Java		%
+%						%
+%%%%%%%%%%%%%%%%
+
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+
+\usepackage{listings}
+\lstset{language=Java,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  commentstyle=\color{pgreen},
+  keywordstyle=\color{pblue},
+  stringstyle=\color{pred},
+  basicstyle=\ttfamily,
+}
+
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\begin{document}
+
+\begin{titlepage}
+  \begin{center}
+
+% Upper part of the page
+
+    \textsc{\Large Universite Catholique de Louvain}\\[1cm]
+
+    \textsc{\LARGE{ Programming Language Concepts}}\\[1cm]
+
+
+% Title
+    \HRule \\[0.35cm]
+    {\huge \bfseries PokemOZ}\\
+    \HRule \\[0.35cm]
+        \end{center}
+    \begin{center}
+    \HRule \\[0.2cm]
+  \end{center}
+
+    \begin{minipage}{0.48\textwidth}
+      \begin{flushleft} \large
+        \textit{Auteurs:}\\
+        Arnaud \textsc{Dethise} (37701200)\\
+        Aloïs \textsc{Paulus} (52991400)\\  \vspace{0.3cm}
+        
+      \end{flushleft}
+    \end{minipage}
+    \begin{minipage}{0.48\textwidth}
+      \begin{flushright} \large
+        \textit{Cours:} \\
+        LINGI1131 \\ \vspace{0.3cm} 
+       
+      \end{flushright}
+    \end{minipage}
+
+    \vfill
+% Bottom of the page
+
+\end{titlepage}
+
+\section{Structure}
+La structure est décrite sur la figure \ref{compo}.
+\begin{figure}[!h]
+	\label{compo}
+	%\includegraphics{compo.png}
+	\caption{Components diagram}
+\end{figure}
+
+L'exécutable est PokemozMain.ozf. Il va traiter les paramètres et instancier les objets importants, puis lancer le functor GameServer. Celui-ci initialise tous les autres functors puis s'occupe de gérer l'évolution de l'état du jeu et le contrôle des PNJs (voir section \ref{sec_state_serv} pour le diagramme d'état de GameServer).
+
+Les trainers (joueur ou PNJs) peuvent déclencher des combats en activant les méthodes du functor BattleUtils.
+
+\section{Port Objects}
+
+\begin{figure}[!h]
+	%\includegraphics{data.png}
+	\caption{Port objects diagram}
+\end{figure}
+
+Les port objects principaux sont Trainer et Pokemoz. Pokemoz contient lui-même un objet Progress qui enregistre les états liés à la santé et l'expérience. Trainer contient notamment sa position et son Pokemoz. Il est dérivé en plusieurs autre objets qui "héritent" de lui : TrainerNPC, TrainerAuto et TrainerManual. Les données d'états de ceux-ci sont les mêmes, mais ils gèrent des messages supplémentaires et différents.
+
+Nous utilisons également un autre port object dans GameServer pour gérer l'état général du jeu, selon qu'il soit actif ou en attente (d'un combat par exemple).
+
+Tous les port objects sont créés en utilisant la function NewPortObject de Utils.oz.
+
+
+\section{State diagrams}
+
+\subsection{GameServer \label{sec_state_serv}}
+
+\begin{figure}[!h]
+	\label{state_serv}
+	%\includegraphics{state_serv.png}
+	\caption{GameServer state diagram}
+\end{figure}
+
+GameServer a 3 états (running, waiting, finished). L'état running correspond à celui où le joueur est sur la carte. Dans cet état, le GameServer envoie régulièrement (à cahque tic d'horloge) des messages 'move' aux trainers. L'état waiting correspond à une attente d'instruction de l'utilisateur ou un combat. Dans cet état, le serveur bloque les déplacements. Enfin, l'état finished correspond à la fin du jeu. Le message qui fait entrer dans cet état contient un paramètre qui indique si le jeu s'est soldé sur une victoire ou une défaite.
+
+Il faut préciser que la structure implémentée n'est pas celle décrite. À cause de l'évolution parfois improvisée de notre code (soit parce que nous avons trouvé de nouveaux besoins, soit parce que nous avons vu en cours de nouvelles techniques), certains messages sont en fait des functions qui vont réagir différemment en fonction de l'état. Toutefois, le fonctionnement est tel qu'indiqué sur la figure \ref{state_serv}.
+
+\subsection{TrainerManual}
+
+\begin{figure}[!h]
+	\label{state_player}
+	%\includegraphics{state_player.png}
+	\caption{TrainerManual state diagram}
+\end{figure}
+
+Les états de l'objet TrainerManual sont simples. Lorsqu'il fait une action, celle-ci est traitée puis le trainer passe en mode waiting. Dans cet état, il ne peut pas prendre de nouvelle commande jusqu'au prochain tic d'horloge (envoyé par GameServer), qui le remettra en état playing et apte à recevoir de nouvelles instructions.
+
+\subsection{TrainerNPC}
+
+\begin{figure}[!h]
+	\label{state_npc}
+	%\includegraphics{state_npc.png}
+	\caption{TrainerNPC state diagram}
+\end{figure}
+
+L'objet TrainerNPC possèdent les états playing et lost. Dans l'état playing, il se déplacera et tentera d'attaquer les joueur lorsqu'il en recevra l'instruction (messages 'move' et 'look' envoyés par GameServer à chaque tic d'horloge). Si le joueur est en vue, le message 'look' peut produire un combat. S'il perd ce combat, le PNJ s'en rendra compte et passera de lui-même dans l'état lost, où il ignorera toutes les consignes du GameServer et restera inactif.
+
+
+\section{Difficultés rencontrées}
+
+La principale difficultés que nous avons rencontrée est que la structure est un peu confuse. Par conséquent, la gestion des responsabilités est décentralisée. L'effet est que certains messages peuvent être émis alors que leur cible n'est pas en état de les recevoir. Dans ce cas, il est confus de savoir quel composant va interrompre ce message, et parfois il arrivera jusqu'à destination où il sera simplement ignoré.
+
+Bien sûr nous avons vu comment gérer cette situation dans les derniers cours, mais une partie du code avait déjà été écrite, ce qui explique les incohérences de structure. Cette situation ne semble malgré tout pas problématique puisque aucun message ne devrait être traité s'il peut poser problème à la stabilité du jeu.
+
+\vspace{0.2cm}
+
+Un autre soucis a été que plusieurs situations provoquaient des deadlocks. Un exemple est la situation où un trainer veut connaître la position des autres trainers. Il demande alors au GameServer de récupérer celles-ci en envoyant un get(pos .) à tous les trainers.
+
+Un de ces messages est envoyé au trainer qui est en train d'attendre la réponse du GameServer, et ceux-ci se retrouvent tous deux bloqués.
+
+Cela a été réglé en gardant les positions des trainers dans l'état du GameServer et en synchronisant leur mise à jour.
+
+\vspace{0.2cm}
+
+Une dernière difficulté est l'utilisation de certaines méthodes propres à Mozart mais plus complexes. Par exemple, il nous est difficile de fermer proprement l'application, malgré l'utilisation de Application.exit. Également, lorsque nous mettons à jour les icônes des trainers sur la carte, celle-ci clignotent légèrement à cause du temps nécessaire au redessinage. Ce problème a été réduit en rafraichissant la carte uniquement lorsque c'est nécessaire, mais est toujours présent.
+
+
+\end{document}
