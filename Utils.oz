@@ -1,34 +1,26 @@
 functor
 import
+   QTk at 'x-oz://system/wp/QTk.ozf'
+   OS
    System
    Open
+   PokemozMain
 export
    NewPortObject
    Printf
    CalculateNewPos
    MoveType
-   AutoFight
    LoadMapFile
-   PokemozType
-   PokemozMaxHp
-   PokemozXPNeeded
-   PokemozDatabaseName
+   PickMode
+   PickPokemoz
+   WantToFight
+   Mode
 define
+   Mode
 
    Printf = System.showInfo
 
-   PokemozType = pokemoztype(water grass fire)
-  
-   PokemozMaxHp = pokemozmaxhp(20 22 24 26 28 30)
-   
-   PokemozXPNeeded = pokemozxpneeded(5 12 20 30 50)
-
-   PokemozDatabaseName = pokemozdatabasename( 
-	water: water("Squirtle" "Psyduck" "Poliwag" "Steel" "Shellder" "Krabby") 
-	grass: grass("Bulbasaur" "Oddish" "Bellsprout" "Tangela" "Exeggcute" "Paras") 
-	fire: fire("Charmander" "Vulpix" "Growlithe" "Ponyta" "Magmar" "Flareon"))
-
-   fun {NewPortObject Init Fun}  
+   fun {NewPortObject Init Fun}
       proc {MsgLoop S1 State}
 	 case S1 of Msg|S2 then
 	    {MsgLoop S2 {Fun State Msg}}
@@ -49,6 +41,8 @@ define
 	 p(x:P.x-1 y:P.y)
       [] right then
 	 p(x:P.x+1 y:P.y)
+      else
+      p(x:P.x y:P.y)
       end
    end
 
@@ -68,8 +62,55 @@ define
       end
    end
 
-   MoveType = movetype(up down right left stay)
+   fun {PickPokemoz}
+     local G W F ImgF ImgG ImgW CD
+        CD = {OS.getCWD}
+        ImgG = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
+        ImgF = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
+        ImgW = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
+        Desc=td(label(init: "Pick the type of your pokemon" height:3)
+                lr(button(image:ImgG return:G action:toplevel#close)
+                   button(image:ImgW return:W action:toplevel#close)
+                   button(image:ImgF return:F action:toplevel#close)
+                  )
+               )
+     in
+        {{QTk.build Desc} show}
+        if G then grass elseif W then water elseif F then fire end
+     end
+   end
 
-   AutoFight = 2
+   fun {PickMode}
+     local A M
+        Desc=td(label(init: "Welcome to Pokemoz ! \n")
+                label(init: "In the auto mode your trainer will move and fight automatically and in manual mode you will have to move with the keyboard arrow and fight.\n")
+                label(init: "Which mode do you want ?\n")
+                lr(button(text:"Auto" return:A action:toplevel#close)
+                button(text:"Manual" return:M action:toplevel#close)))
+     in
+        {{QTk.build Desc} show}
+        if A then Mode=auto elseif M then Mode=manual end
+        Mode
+     end
+   end
+
+   MoveType = movetype(up down right left)
+
+   fun {WantToFight Pkmz Player}
+      T L Y N
+      Desc = lr(label(init:"You are attacked by a Pokemoz of type "#T#" and level "#L#". Do you want to fight ?")
+               button(text:"Yes" return:Y action:toplevel#close)
+               button(text:"No" return:N action:toplevel#close))
+   in
+       {Send Pkmz get(lx ret(L))}
+       {Send Pkmz get(type ret(T))}
+       if Mode == manual then
+          {{QTk.build Desc} show}
+          if Y then true elseif N then false end
+       else
+          PokemozMain.args.autofight \= 0
+      end
+   end
+
 
 end

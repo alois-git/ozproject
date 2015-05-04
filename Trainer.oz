@@ -3,11 +3,12 @@ import
    Utils
    GameServer
    Map
+   PokemozMain
 export
    NewTrainer
 
 define
-   
+
    fun {NewTrainer Pokemoz Pos Direction}
       %% This object represent a trainer (any trainer)
       %% Available messages :
@@ -26,20 +27,38 @@ define
 
       fun {FunTrainer S Msg}
          case Msg
-         of move then   
-            NewPos GameState in    
-            {Send GameServer.gameState get(ret(GameState))}
-            NewPos = {Map.calculateNewPos S.pos S.dir}
-            if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isFree NewPos} then
-              case S.dir
-                of up    then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y-1)) dir:S.dir)
-                [] down  then trainer(pkmz:S.pkmz pos:pos(x:S.pos.x y:(S.pos.y+1)) dir:S.dir)
-                [] left  then trainer(pkmz:S.pkmz pos:pos(x:(S.pos.x-1) y:S.pos.y) dir:S.dir)
-                [] right then trainer(pkmz:S.pkmz pos:pos(x:(S.pos.x+1) y:S.pos.y) dir:S.dir)
-              end
+         of move then
+            Ack NewPos CurrentGameState in
+            case S.dir
+              of up then NewPos = pos(x:S.pos.x y:(S.pos.y-1))
+              [] down  then NewPos =pos(x:S.pos.x y:(S.pos.y+1))
+              [] left  then NewPos =pos(x:(S.pos.x-1) y:S.pos.y)
+              [] right then NewPos =pos(x:(S.pos.x+1) y:S.pos.y)
             end
-            
+
+            {Send GameServer.gameState get(state ret(CurrentGameState))}
+
+            if CurrentGameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
+              {Send GameServer.gameState moved(S.pos NewPos Ack)}
+              {Wait Ack}
+              local Jay Center in
+                 Jay = {Map.getJayPosition}
+                 Center = {Map.getCenterPosition}
+                 if NewPos.x == Jay.x andthen NewPos.y == Jay.y then
+                    {GameServer.stopGameServer victory}
+                 elseif NewPos.x == Center.x andthen NewPos.y == Center.y then
+                    {Send S.pkmz heal}
+                 end
+              end
+              % map change requires sending a message so it will wait until pos updated
+              thread {GameServer.notifyMapChanged} end
+              {Delay PokemozMain.args.delay div PokemozMain.args.speed}
+              trainer(pkmz:S.pkmz pos:NewPos dir:S.dir)
+            else
+              S
+            end
          [] turn(D) then
+            thread {GameServer.notifyMapChanged} end
             trainer(pkmz:S.pkmz pos:S.pos dir:D)
          [] fight(P) then
             {Send P attackedby(S.pkmz)}
@@ -52,6 +71,8 @@ define
             S
          [] setpokemoz(P) then
             trainer(pkmz:P pos:S.pos dir:S.dir)
+         else
+            S
          end
       end
 

@@ -2,29 +2,32 @@ functor
 import
    Application
    Property
-   Gui
    Utils
    GameServer
    TrainerManual
+   TrainerAuto
    TrainerNPC
-   Map
+   Pokemoz
+   Pickle
+export
+   Args
 define
    %% Default values
-   MAP = map
-   WILDPOKEMOZPROBA = 100
+   MAP = "map.txt"
+   WILDPOKEMOZPROBA = 50
    NBPOKEMOZ = 1
    DEFAULTSPEED = 9
    DELAY = 200
-   RUNAWAYPROBA = 0
+   RUNAWAYPROBA = 20
    AUTOFIGHT = 2
-   
+
    %% Posible arguments
    Args = {Application.getArgs
            record(
               map(single char:&m type:atom default:MAP)
               pokemoz(single char:&p type:int default:NBPOKEMOZ)
               speed(single char:&s type:int default:DEFAULTSPEED)
-	      wildprobability(single char:&p type:int default:WILDPOKEMOZPROBA)
+	      wildprobability(single char:&w type:int default:WILDPOKEMOZPROBA)
               runawayproba(single char:&r type:int default:RUNAWAYPROBA)
 	      delay(single char:&d type:int default:DELAY)
 	      autofight(single char:&a type:int default:AUTOFIGHT)
@@ -35,31 +38,29 @@ define
       {Utils.printf "Usage: "#{Property.get 'application.url'}#" [option]"}
       {Utils.printf "Options:"}
       {Utils.printf "  -m, --map FILE\tFile containing the map (default "#MAP#")"}
-      {Utils.printf "  -p, --pokemoz \t Number of pokemon you can have"}
+      {Utils.printf "  -d, --delay \t Game clock speed"}
       {Utils.printf "  -s, --speed \t Speed of the trainer [0,10]"}
       {Utils.printf "  -w, --wildprobability \t Probability of wild pokemon in grass"}
       {Utils.printf "  -r, --runwayprobability \t Probability of run away from a wild pokemon in grass"}
-      {Utils.printf "  -a, --autofight \t 0 always run away / 1 always fight / 2 ask"}
+      {Utils.printf "  -a, --autofight (only in auto mode) \t 0 always run away / 1 always fight / 2 ask"}
       {Utils.printf "  -h, --help \t This help"}
       {Utils.printf "Example :"}
       {Application.exit 0}
    end
-      
-   local Player NPCs in
-      %{Utils.printf {Utils.loadMapFile {VirtualString.toAtom Args.map}}}
-      {Utils.printf "load map file"}
-      %Map = {Utils.loadMapFile {VirtualString.toAtom Args.map}}
-      {Map.setupMap default}
-      {Utils.printf "Init player"}
 
-      Player = {TrainerManual.newTrainerManual {Gui.pickpokemoz} pos(x:7 y:7) left}
-      NPCs = {TrainerNPC.newTrainerNPC  pos(x1 y:7) left false 0}|nil
+   local Player NPCs MapToLoad in
 
-      {Utils.printf "Init game"}
-      {GameServer.startGameServer Map.layout NPCs Player Delay}
+      MapToLoad = {Pickle.load Args.map}
+
+      if {Utils.pickMode} == manual then
+         Player = {TrainerManual.newTrainerManual {Pokemoz.newPokemoz {Utils.pickPokemoz} "Player Pokemoz" 5} pos(x:7 y:7) left}
+      else
+         Player = {TrainerAuto.newTrainerAuto {Pokemoz.newPokemoz water "Auto Player Pokemoz" 5} pos(x:7 y:7) left}
+      end
+
+      NPCs = {TrainerNPC.newTrainerNPC  pos(x:2 y:5) right false 1}|{TrainerNPC.newTrainerNPC  pos(x:3 y:7) left true 4}|nil
+
+      {GameServer.startGameServer map(map:MapToLoad) NPCs Player Args.delay Args.wildprobability Args.runawayproba}
 
    end
-
-   {Utils.printf "Leaving app"}
-   {Application.exit 0}
 end

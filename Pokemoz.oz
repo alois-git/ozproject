@@ -55,7 +55,7 @@ define
          [] heal then
             {Send S.progress heal}
          [] get(D ret(R)) then
-            case D 
+            case D
             of type then R = S.type
             [] name then R = S.name
             else {Send S.progress get(D ret(R))}
@@ -70,20 +70,20 @@ define
 
    fun {NewRandomPokemoz}
       PkmzType = type(grass fire water)
-      PkmzName = names( 
+      PkmzName = names(
                      namecount: 6
-                     grass: names("Bulbasoz" "Ozdish" "Bellsproz" "Tangeloz" "Ozeggcute" "Paroz") 
-                      fire: names("Charmandoz" "Vulpoz" "Ozlithe" "Ponytoz" "Ozgmar" "Flareoz")
+                     grass: names("Bulbasoz" "Ozdish" "Bellsproz" "Tangeloz" "Ozeggcute" "Paroz")
+                     fire: names("Charmandoz" "Vulpoz" "Ozlithe" "Ponytoz" "Ozgmar" "Flareoz")
                      water: names("Oztirtle" "Ozduck" "Poliwoz" "Lugioz" "Ozellder" "Krabboz") % La dernière est drôle
                   )
       T N L
    in
-      T = {Abs {OS.rand}} mod 3 + 1
-      N = {Abs {OS.rand}} mod PkmzName.namecount
-      L = {Abs {OS.rand}} mod (MAXIMUMLVL - MINIMUMLVL) + MINIMUMLVL
+      T = ({Abs {OS.rand}} mod 3) + 1
+      N = ({Abs {OS.rand}} mod PkmzName.namecount) +1
+      L = ({Abs {OS.rand}} mod (MAXIMUMLVL - MINIMUMLVL)) + MINIMUMLVL
       {NewPokemoz PkmzType.T PkmzName.(PkmzType.T).N L}
    end
-   
+
    fun {NewProgress Level}
       %% This private object allows to update a Pokemoz status
       %% Available messages :

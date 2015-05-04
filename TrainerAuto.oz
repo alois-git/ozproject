@@ -1,130 +1,121 @@
 functor
 import
    Utils
+   GameServer
    Map
+   Trainer
+   BattleUtils
 export
-   TrainerAuto
+   NewTrainerAuto
 define
-   
-   fun {TrainerAuto Trainer Gui InitialMap}
 
-     
+   fun {NewTrainerAuto Pokemoz Position Direction }
+      %% This object represent a player trainer played by the computer
+      %% Available messages :
+      %%    move -- always forward
+      %%    turn(DIRECTION)
+      %%       where DIRECTION is one of the following : up down left right
+      %%    fight(POKEMOZ) -- tell this trainer pokemoz to attack the other one
+      %%       where POKEMOZ is an instance of the pokemoz object representing the enemy
+      %%    haslost(ret(RETURN))
+      %%       where RETURN in an unbound variable to be bound to either true or false
+      %%    get(ATTRIBUTE ret(RETURN))
+      %%       where ATTRIBUTES is one of the following : pkmz, pos, dir
+      %%       and RETURN is an unbound variable
+
+      Super = {Trainer.newTrainer Pokemoz Position Direction}
+      InitTrainerAuto = pc(super:Super)
+
+      fun {FunTrainerAuto S Msg}
+         Dir in
+         case Msg of move(_) then
+            NewMove Position NewPos GameState in
+	          {Send S.super get(pos ret(Position))}
+            NewMove = {GetNextMove Position {Map.getJayPosition}}
+            {Send S.super get(dir ret(Dir))}
+            if NewMove == Dir then
+               NewPos = {Map.calculateNewPos Position NewMove}
+               {Send GameServer.gameState get(state ret(GameState))}
+               if GameState == running andthen {Map.getTerrain NewPos.x NewPos.y} \= none andthen {GameServer.isPosFree NewPos} then
+                  {Send S.super move}
+               end
+               local Jay Center in
+                  Jay = {Map.getJayPosition}
+                  Center = {Map.getCenterPosition}
+                  if NewPos.x == Jay.x andthen NewPos.y == Jay.y then
+                     {GameServer.stopGameServer victory}
+                  elseif NewPos.x == Center.x andthen NewPos.y == Center.y then
+                     P in
+                     {Send S.super get(pkmz ret(P))}
+                     {Send P heal}
+                  elseif {Map.getTerrain NewPos.x NewPos.y} == grass then
+                     thread {BattleUtils.walkInGrass GameServer.pC} end
+                  end
+               end
+            else
+               {Send S.super turn(NewMove)}
+            end
+            S
+         else
+            {Send S.super Msg}
+            S
+         end
+        end
+      in
+        {Utils.newPortObject InitTrainerAuto FunTrainerAuto}
+      end
+
       % get the best move to minimize the manathan distance between the player and the goal + the number of trainer around
       % + the type of terrain of the new position after this new move
-      fun {GetNextMove Position JayPosition TrainersNPC}
+      fun {GetNextMove Position JayPosition}
          % recursive method to get the best move, keeping the current minimum manathan distance and the best move found
-	 fun {GetNextMoveRec Position JayPosition TrainersNPC Weight MoveIndex SelectedMove}
-	    local NewPosition NewManathanDistance NumberOfTrainerAround TerrainType NewWeight in
-	       NewPosition = {Utils.calculateNewPos Position Utils.moveType.MoveIndex}
-	       NewManathanDistance = {Abs (JayPosition.x - NewPosition.x)} + {Abs (JayPosition.y - NewPosition.y)}
-	       NumberOfTrainerAround = {GetNumberTrainerNPCAround {Map.getPositionsAround NewPosition} TrainersNPC}
-               TerrainType = Map.getTerrain(NewPosition)
-               NewWeight = NewManathanDistance + NumberOfTrainerAround + TerrainType
-               % if we tried all the move return the best found
-	       if MoveIndex > 4 then
-		  SelectedMove
-               % if the new weigth is smaller than the current weight pick this move
-	       elseif NewWeight < Weight then
-		  {GetNextMoveRec Position JayPosition TrainersNPC NewWeight MoveIndex+1 Utils.moveType.MoveIndex}
-               % else just try a new move
-	       else
-		  {GetNextMoveRec Position JayPosition TrainersNPC Weight MoveIndex+1 SelectedMove}
-	       end
-	    end
-	 end
+        fun {GetNextMoveRec Position JayPosition Weight MoveIndex SelectedMove}
+
+          local NewPosition NewManathanDistance TerrainType NewWeight NumberOfTrainerAround in
+
+           NewPosition = {Utils.calculateNewPos Position Utils.moveType.MoveIndex}
+           NewManathanDistance = {Abs (JayPosition.x - NewPosition.x)} + {Abs (JayPosition.y - NewPosition.y)}
+           NumberOfTrainerAround = {GetNumberTrainerNPCAround {Map.getPositionsAround NewPosition}}
+           TerrainType = {Map.getTerrain NewPosition.x NewPosition.y}
+           if TerrainType ==  grass then
+            NewWeight = NewManathanDistance + 3 + NumberOfTrainerAround
+           elseif TerrainType ==  road then
+            NewWeight = NewManathanDistance + 1 + NumberOfTrainerAround
+           else
+            NewWeight = NewManathanDistance + 9999
+           end
+           if MoveIndex > 3 then
+             SelectedMove
+           elseif NewWeight < Weight then
+             {GetNextMoveRec Position JayPosition NewWeight MoveIndex+1 Utils.moveType.MoveIndex}
+           else
+             {GetNextMoveRec Position JayPosition Weight MoveIndex+1 SelectedMove}
+           end
+
+         end
+        end
       in
-	 {GetNextMoveRec Position JayPosition TrainersNPC 0 1 none}
+
+       {GetNextMoveRec Position JayPosition 99999 1 up}
       end
+
 
       % maybe move that to trainer class and get it with a port message
-      fun {IsPosFree Pos Trainers}
-         case Trainers
-         of H|T then
-            local R in
-            {Send H get(position ret(R))}
-            if R == Pos then
-               false
-            else
-               {IsPosFree Pos T}
-            end end
-         [] nil then
-            true
-         end
+      fun {GetNumberTrainerNPCAround Positions}
+        fun {GetNumberTrainerNPCAroundRec Positions A}
+          case Positions of H|T then
+             if {GameServer.isPosFree H} == false then
+              {GetNumberTrainerNPCAroundRec T A+1}
+             else
+              {GetNumberTrainerNPCAroundRec T A}
+             end
+          [] nil then
+
+             A
+          end
+        end
+      in
+        {GetNumberTrainerNPCAroundRec Positions 0}
       end
 
-      % maybe move that to trainer class and get it with a port message
-      fun {GetNumberTrainerNPCAround Positions TrainersNPC}
-         fun {GetNumberTrainerNPCAroundRec Position TrainersNPC A}
-            case Positions of H|T then
-                 if {IsPosFree H TrainersNPC} == false then
-                    {GetNumberTrainerNPCAroundRec T TrainersNPC A+1}
-                 else
-                    {GetNumberTrainerNPCAroundRec T TrainersNPC A}
-                 end
-            [] nil then
-               A
-            end
-         end
-         in
-          {GetNumberTrainerNPCAroundRec Positions TrainersNPC 0}
-      end
-
-      fun{Inbox State Msg}
-	 case State of state(starting) then
-	    case Msg of start then
-	       % player should automaticly choose a pokemon (random)
-               {Send Gui startauto}
-               {Utils.printf "auto choosed pokemoz"}
-	       {Send Trainer pokemonchoosen(grass)}
-	       state(playing none)
-	    else
-	       State
-	    end
-	 [] state(playing Trainers) then
-	    case Msg of mapchanged(Trainers) then
-               {Send Gui mapchanged(Trainers)}
-	       state(playing Trainers)
-	    [] play then
-	       % player should analyse the map to know what to play
-               {Utils.printf "auto should play"}
-	       local Position JayPosition in
-		  JayPosition = {Map.getJayPosition}
-                    {Utils.printf "got jay position from map"}
-		  {Send Trainer getposition(Position)}
-                  {Utils.printf "got position from trainer"}
-		  {Send Trainer move({GetNextMove Position JayPosition Trainers})}
-                  {Utils.printf "playing this move:"#{GetNextMove Position JayPosition Trainers}}
-		  State
-	       end
-	    [] choicewild(OtherPokemoz) then
-	       % player should choose to fight or not depending on which wild pokemon
-               % depending on type / level / current pokemoz hp
-               % evaluation functions is as a weighted sum of various factors
-	       local R Pokemoz in
-		  {Send Trainer getpokemoz(Pokemoz)}
-		  R = 1* Pokemoz.lvl - 1* OtherPokemoz.lvl + 2 * Pokemoz.hp
-		  if R > 20 then
-		     {Send Trainer guiwildchoice(true OtherPokemoz)}
-		  else
-		     {Send Trainer guiwildchoice(false OtherPokemoz)}
-		  end
-	       end
-	       State
-	    [] pokemozchanged(Pokemoz) then
-               {Send Gui pokemozchanged(Pokemoz)}
-	       State
-	    [] lost then
-               {Send Gui lost}
-	       State
-	    [] win then
-	       State
-	    else
-	       State
-	    end
-	 end
-      end
-   in
-      {Utils.newPortObject state(starting) Inbox}
-   end
-   
 end

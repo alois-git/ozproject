@@ -4,7 +4,8 @@ import
    GameServer
    Pokemoz
    OS
-
+   Utils
+   Map
 export
    BattleTrainer
    WalkInGrass
@@ -13,15 +14,16 @@ export
 
 define
    Probability
+   RunAwayProbability
    Type
-   Screen
 
-   proc {SetupBattle P}
+   proc {SetupBattle P RunAwayP}
       F G W CD in
       CD = {OS.getCWD}
       Probability = P
-      F = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
-      G = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
+      RunAwayProbability = RunAwayP
+      G = {QTk.newImage photo(file:CD#'/images/type_grass.gif')}
+      F = {QTk.newImage photo(file:CD#'/images/type_fire.gif')}
       W = {QTk.newImage photo(file:CD#'/images/type_water.gif')}
       Type = type(fire:F grass:G water:W)
    end
@@ -37,82 +39,107 @@ define
 
 
    proc {BattleWild Wild Player}
-      Pkmz in
+      Pkmz
+   in
       {Send Player get(pkmz ret(Pkmz))}
-      {Wait Pkmz}
-      {BattleWild Pkmz}
+      {Battle Wild Pkmz}
    end
-      
+
    proc {Battle Enemy Ally}
 
-      proc {BattleEnemyTurn Enemy Ally Display}
+      proc {BattleAllyTurn Enemy Ally}
          V in
          {Send Enemy attackedby(Ally)}
-         % TODO Display.h1.update ( Enemy.getHealth )
          {Send Enemy isko(ret(V))}
          if V then
             Exp in
             {Send Enemy get(lx ret(Exp))}
             {Send Ally addxp(Exp)}
+            {Map.addMsgConsole "Your have won the combat !"}
+            {Map.addMsgConsole "Your Pokemoz won "#Exp#"XP !"}
+            {Map.updatePlayerPokemozInfo Ally}
             {Send GameServer.gameState run}
          else
-            {BattleAllyTurn Ally Display}
+            {BattleEnemyTurn Enemy Ally}
          end
       end
 
-      proc {BattleAllyTurn Enemy Ally Display}
+      proc {BattleEnemyTurn Enemy Ally}
          V in
-         {Send Ally attackdby(Enemy)}
-         % TODO Display.h2.update ( Ally.getHealth )
+         {Send Ally attackedby(Enemy)}
          {Send Ally isko(ret(V))}
          if V then
+            {Map.addMsgConsole "Your have lost the combat !"}
+            {Map.updatePlayerPokemozInfo Ally}
             {GameServer.stopGameServer defeat}
          else
-            {BattleEnemyTurn Enemy Ally Display}
+            {BattleAllyTurn Enemy Ally}
          end
       end
       Ack
-      Display
    in
       {Send GameServer.gameState wait(Ack)}
       {Wait Ack}
-      Display = {DrawBattleGui Enemy Ally}
-      {BattleAllyTurn Enemy Ally Display}
+      if Utils.mode == manual then
+         {DrawBattleUI Enemy Ally}
+      end
+      {BattleAllyTurn Enemy Ally}
    end
 
    proc {WalkInGrass Player}
-      R in
+      R F Pkmz Ack
+   in
       R = {Abs {OS.rand}} mod 100
       if R < Probability then
-         {BattleWild {Pokemoz.newRandomPokemoz} Player}
+         {Send GameServer.gameState wait(Ack)}
+         {Wait Ack}
+         Pkmz = {Pokemoz.newRandomPokemoz}
+         if {Utils.wantToFight Pkmz Player} then
+            {BattleWild Pkmz Player}
+         else
+            F = {Abs {OS.rand}} mod 100
+            if F < RunAwayProbability then
+               {Send GameServer.gameState run}
+            else
+               {Map.addMsgConsole "You cannot flee !"}
+               {BattleWild Pkmz Player}
+            end
+         end
       end
    end
 
+   proc {DrawBattleUI Pkmz1 Pkmz2}
+      H1 H2 L1 L2 T1 T2 MaxH1 MaxH2 Screen C in
 
-   fun {DrawBattleUI Pkmz1 Pkmz2}
-      H1 H2 L1 L2 T1 T2 in
-      {{QTk.build lr(
+      {{QTk.build td(
                   canvas(  width:900
-                           height:900
+                           height:300
                            handle:Screen)
-                  )}
+                  button(text:"Ok" return:C action:toplevel#close))}
             show}
+
       {Send Pkmz1 get(hp ret(H1))}
       {Send Pkmz2 get(hp ret(H2))}
+
+      {Send Pkmz1 get(hpmax ret(MaxH1))}
+      {Send Pkmz2 get(hpmax ret(MaxH2))}
+
       {Send Pkmz1 get(lx ret(L1))}
       {Send Pkmz2 get(lx ret(L2))}
+
       {Send Pkmz1 get(type ret(T1))}
       {Send Pkmz2 get(type ret(T2))}
-      {Screen create(text 0 0 anchor:nw text:H1)}
-      {Screen create(text 0 200 anchor:nw text:L1)}
-    
+
+      {Screen create(text 0 0 anchor:nw text:"HP: "#H1#"/"#MaxH1)}
+      {Screen create(text 0 200 anchor:nw text:"LVL: "#L1)}
+
       {Screen create(image 150 0 anchor:nw image:Type.T1)}
       {Screen create(image 450 0 anchor:nw image:Type.T2)}
-      
-      {Screen create(text 750 0 anchor:nw text:H2)}
-      {Screen create(text 750 200 anchor:nw text:L2)}
 
-      Display = text(h1:H1 h2:H2)
+      {Screen create(text 750 0 anchor:nw text:"HP: "#H2#"/"#MaxH2)}
+      {Screen create(text 750 200 anchor:nw text:"LVL: "#L2)}
+
+      if C then skip end
 
    end
 
