@@ -27,7 +27,7 @@ define
               map(single char:&m type:atom default:MAP)
               pokemoz(single char:&p type:int default:NBPOKEMOZ)
               speed(single char:&s type:int default:DEFAULTSPEED)
-	      wildprobability(single char:&p type:int default:WILDPOKEMOZPROBA)
+	      wildprobability(single char:&w type:int default:WILDPOKEMOZPROBA)
               runawayproba(single char:&r type:int default:RUNAWAYPROBA)
 	      delay(single char:&d type:int default:DELAY)
 	      autofight(single char:&a type:int default:AUTOFIGHT)
@@ -38,11 +38,11 @@ define
       {Utils.printf "Usage: "#{Property.get 'application.url'}#" [option]"}
       {Utils.printf "Options:"}
       {Utils.printf "  -m, --map FILE\tFile containing the map (default "#MAP#")"}
-      {Utils.printf "  -p, --pokemoz \t Number of pokemon you can have"}
+      {Utils.printf "  -d, --delay \t Game clock speed"}
       {Utils.printf "  -s, --speed \t Speed of the trainer [0,10]"}
       {Utils.printf "  -w, --wildprobability \t Probability of wild pokemon in grass"}
       {Utils.printf "  -r, --runwayprobability \t Probability of run away from a wild pokemon in grass"}
-      {Utils.printf "  -a, --autofight \t 0 always run away / 1 always fight / 2 ask"}
+      {Utils.printf "  -a, --autofight (only in auto mode) \t 0 always run away / 1 always fight / 2 ask"}
       {Utils.printf "  -h, --help \t This help"}
       {Utils.printf "Example :"}
       {Application.exit 0}
